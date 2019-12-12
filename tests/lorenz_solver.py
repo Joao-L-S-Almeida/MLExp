@@ -1,6 +1,6 @@
 import numpy as np
 
-from problem_classes import NonlinearOscillator
+from problem_classes import LorenzSystem
 from numerics.timeint import RK4
 import matplotlib.pyplot as plt
 
@@ -13,7 +13,10 @@ if __name__ == "__main__":
     T = 50
     dt = 0.01
 
-    problem = NonlinearOscillator()
+    rho = 28
+    beta = 8/3
+    sigma = 10
+    problem = LorenzSystem(rho, sigma, beta)
 
     solver = RK4(problem)
 
@@ -36,9 +39,10 @@ if __name__ == "__main__":
 
     plt.plot(time, variables_matrix[0, :], label="x")
     plt.plot(time, variables_matrix[1, :], label="y")
+    plt.plot(time, variables_matrix[2, :], label="z")
 
-    np.save("MLExp/data/Oscillator_variables.npy", variables_matrix)
-    np.save("MLExp/data/Oscillator_derivatives.npy", derivatives_matrix)
+    np.save("MLExp/data/Lorenz_variables.npy", variables_matrix)
+    np.save("MLExp/data/Lorenz_derivatives.npy", derivatives_matrix)
 
     plt.xlabel("Time(s)")
     plt.title("Nonlinear Oscillator")
