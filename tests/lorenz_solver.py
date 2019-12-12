@@ -9,9 +9,9 @@ import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
 
-    initial_state = np.array([2, 0])
+    initial_state = np.array([1, 0, 0])
     T = 50
-    dt = 0.01
+    dt = 0.001
 
     rho = 28
     beta = 8/3
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     np.save("MLExp/data/Lorenz_derivatives.npy", derivatives_matrix)
 
     plt.xlabel("Time(s)")
-    plt.title("Nonlinear Oscillator")
+    plt.title("Lorenz System")
     plt.legend()
 
     plt.grid(True)
