@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib.pyplot as plt
+
 from core.neural_net_classes import DenseNetwork
 
 if __name__ == "__main__":
@@ -14,15 +16,18 @@ if __name__ == "__main__":
     variables = variables.T
     derivatives = derivatives.T
 
-    input_cube = variables
-    output_cube = derivatives
+    training_dim = int(variables.shape[0]/2)
+
+    input_cube = variables[:training_dim, :]
+    output_cube = derivatives[:training_dim, :]
+
     model_name = "Oscillator_surrogate.h5"
 
     test_setup = {
                   'layers_cells_list': [100, 100],
                   'dropouts_rates_list': [0, 0],
                   'learning_rate': 1e-05,
-                  'l2_reg' : 1e-06,
+                  'l2_reg': 1e-06,
                   'activation_function': 'elu',
                   'loss_function': 'mse',
                   'optimizer': 'adam',
@@ -31,6 +36,6 @@ if __name__ == "__main__":
 
     neural_net = DenseNetwork(test_setup)
     neural_net.fit(input_cube, output_cube)
+    print("Saving the trained model")
     neural_net.save(data_path+model_name)
 
-    print("Data loaded.")
