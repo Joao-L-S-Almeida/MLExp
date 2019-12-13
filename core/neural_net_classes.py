@@ -1,36 +1,60 @@
-import numpy as np
-import tensorflow as tf
-from argparse import ArgumentParser
 
-class Oscillator(t_max):
+from keras.layers import Input, Dense, Dropout
+from keras.models import Model
+from keras.models import load_model
+from keras import regularizers
 
-    def __init__(self):
+class DenseNetwork:
 
-        pass
+    def __init__(self, setup):
 
-    def __call__(self):
+        self.layers_cells_list = setup['layers_cells_list']
+        self.dropouts_rates_list = setup['dropouts_rates_list']
+        self.learning_rate = setup['learning_rate']
+        self.l2_reg = setup['l2_reg']
+        self.activation_function = setup['activation_function']
+        self.optimizer = setup['optimizer']
+        self.loss_function = setup['loss_function']
+        self.n_epochs = setup['n_epochs']
+        self.model = None
 
-        alpha1 = -0.1
-        alpha2 = 2
-        beta1 = -2
-        beta2 = 0.1
+    def construct(self, input_dim, output_dim):
 
-        f = alpha1*(x**2) + beta1*(y**2)
-        g = alpha2*(x**2) + beta2*(y**2)
+        input_tensor = Input(shape=(input_dim,))
+        layer_input = input_tensor
 
-        return np.array([f, g])
+        for layer_cells, dropout_rate in \
+            zip(self.layers_cells_list, self.dropouts_rates_list):
 
-class FeedForwardNet:
+            dense_output = Dense(layer_cells,
+                                 activation=self.activation_function,
+                                 kernel_regularizer=regularizers.l2(self.l2_reg))(layer_input)
 
-    def __init__(self):
-        pass
-    def __call__(self):
-        pass
+            layer_output = Dropout(dropout_rate)(dense_output)
 
-if __name__ == "__main__":
+            layer_input = layer_output
 
-    parser = ArgumentParser(description='Input arguments for the neural network training')
-    parser.add_argument(
-        '-m', '--model_name', type=str, help='Model name')
+        output_tensor = Dense(output_dim, activation='linear')(layer_output)
 
-    args = parser.parse_args()
+        model = Model(inputs=input_tensor, outputs=output_tensor)
+        model.compile(optimizer=self.optimizer,
+                      loss=self.loss_function)
+
+        return model
+
+    def fit(self, input_data, output_data):
+
+        model = self.construct(input_data.shape[1], output_data.shape[1])
+        model.fit(input_data, output_data,
+                  batch_size = input_data.shape[0],
+                  epochs=self.n_epochs)
+
+        self.model = model
+
+    def save(self, path):
+
+        self.model.save(path)
+
+    def load(self, path):
+
+        self.model = load_model(path)
