@@ -5,7 +5,7 @@ from numerics.timeint import RK4
 import matplotlib.pyplot as plt
 
 # Testing to solve a nonlinear oscillator problem using
-# a 4th order and 4 steps Runge-Kutta
+# a 4th order and a four steps Runge-Kutta
 
 if __name__ == "__main__":
 

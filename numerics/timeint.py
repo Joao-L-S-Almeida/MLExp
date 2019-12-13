@@ -1,5 +1,5 @@
 import numpy as np
-
+    
 class ExplicitIntegrator:
 
     def __init__(self, coeffs, weights, right_operator):

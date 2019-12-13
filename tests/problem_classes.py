@@ -21,8 +21,8 @@ class LorenzSystem:
     def __init__(self, rho, sigma, beta):
 
         self.rho = rho
-        self.beta = sigma
-        self.sigma = beta
+        self.beta = beta
+        self.sigma = sigma
 
     def __call__(self, x, y, z):
 
@@ -30,5 +30,5 @@ class LorenzSystem:
         g = x*(self.rho - z) - y
         h = x*y - self.beta*z
 
-        return np.array([x, y, z])
+        return np.array([f, g, h])
 
