@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
     estimated_variables = np.vstack(estimated_variables)
 
-    print("Extrpolation concluded.")
+    print("Extrapolation concluded.")
 
     for ss in range(estimated_variables.shape[1]):
 

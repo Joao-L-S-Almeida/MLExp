@@ -38,7 +38,6 @@ class RK4(ExplicitIntegrator):
 
         ExplicitIntegrator.__init__(self, coeffs, weights, right_operator)
 
-
 class FunctionWrapper:
 
     def __init__(self, function):
@@ -46,6 +45,8 @@ class FunctionWrapper:
         self.function = function
 
     def __call__(self, input_data):
-        input_data = input_data[None,:]
-        return self.function(input_data)[0,:]
+
+        input_data = input_data[None, :]
+
+        return self.function(input_data)[0, :]
 

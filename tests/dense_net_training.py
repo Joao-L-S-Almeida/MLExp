@@ -31,7 +31,7 @@ if __name__ == "__main__":
                   'activation_function': 'elu',
                   'loss_function': 'mse',
                   'optimizer': 'adam',
-                  'n_epochs' : 10000
+                  'n_epochs': 10000
                   }
 
     neural_net = DenseNetwork(test_setup)
