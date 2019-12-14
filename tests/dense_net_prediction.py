@@ -62,6 +62,7 @@ if __name__ == "__main__":
     estimated_variables = list()
 
     ii = 0
+    # Approach based on Lui & Wolf (https://arxiv.org/abs/1903.05206)
     while time < T_max:
 
         state, derivative_state = solver.step(initial_state, dt)
@@ -81,7 +82,7 @@ if __name__ == "__main__":
         error = np.linalg.norm(estimated_variables[ss, :] - test_input_cube[ss, :], 2)
         relative_error = error / np.linalg.norm(test_input_cube, 2)
 
-        print("Derivative series {}, L2 error evaluation: {}".format(ss, relative_error))
+        print("Variable series {}, L2 error evaluation: {}".format(ss, relative_error))
 
         plt.plot(test_input_cube[:, ss], label="Target")
         plt.plot(estimated_variables[:, ss], label="Estimated")
