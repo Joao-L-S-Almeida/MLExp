@@ -16,7 +16,7 @@ class ExplicitIntegrator:
 
         for stage in range(self.n_stages):
 
-            k = self.right_operator(*variables_state.tolist())
+            k = self.right_operator(variables_state)
             residuals_list[stage, :] = k
             k_weighted = self.weights[stage].dot(residuals_list)
             variables_state = variables_state_initial + self.coeffs[stage] * dt * k_weighted
@@ -37,4 +37,15 @@ class RK4(ExplicitIntegrator):
         coeffs = np.array([0.5, 0.5, 1, 1])
 
         ExplicitIntegrator.__init__(self, coeffs, weights, right_operator)
+
+
+class FunctionWrapper:
+
+    def __init__(self, function):
+
+        self.function = function
+
+    def __call__(self, input_data):
+        input_data = input_data[None,:]
+        return self.function(input_data)[0,:]
 
