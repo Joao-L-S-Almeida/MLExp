@@ -9,7 +9,10 @@ class NonlinearOscillator:
         self.beta1 = 2
         self.beta2 = -0.1
 
-    def __call__(self, x, y):
+    def __call__(self, state):
+
+        x = state[0]
+        y = state[1]
 
         f = self.alpha1*(x**3) + self.beta1*(y**3)
         g = self.alpha2*(x**3) + self.beta2*(y**3)
@@ -24,7 +27,11 @@ class LorenzSystem:
         self.beta = beta
         self.sigma = sigma
 
-    def __call__(self, x, y, z):
+    def __call__(self, state):
+
+        x = state[0]
+        y = state[1]
+        z = state[2]
 
         f = self.sigma * (y - x)
         g = x*(self.rho - z) - y
