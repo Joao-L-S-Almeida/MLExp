@@ -1,8 +1,10 @@
+import sys
+
 import numpy as np
 import matplotlib.pyplot as plt
 from keras.models import load_model
 
-from numerics.timeint import RK4
+from numerics.timeint import RK4, FunctionWrapper
 
 if __name__ == "__main__":
 
@@ -16,7 +18,6 @@ if __name__ == "__main__":
 
     variables = variables.T
     derivatives = derivatives.T
-
 
     training_dim = int(variables.shape[0] / 2)
 
@@ -38,9 +39,10 @@ if __name__ == "__main__":
     for ss in range(estimated_cube.shape[1]):
 
         error = np.linalg.norm(estimated_cube[ss, :] - test_output_cube[ss, :], 2)
-        relative_error = error/np.linalg.norm(test_input_cube, 2)
+        relative_error = error / np.linalg.norm(test_output_cube, 2)
 
         print("Derivative series {}, L2 error evaluation: {}".format(ss, relative_error))
+
         plt.plot(test_output_cube[:, ss], label="Target")
         plt.plot(estimated_cube[:, ss], label="Estimated")
         plt.legend()
@@ -48,14 +50,42 @@ if __name__ == "__main__":
         plt.show()
 
     # Using the derivatives surrogate for time-integrating
-    right_operator = model.predict
+    right_operator = FunctionWrapper(model.predict)
 
     solver = RK4(right_operator)
 
-    initial_state = test_input_cube[:-1, :]
+    initial_state = test_input_cube[-1, :]
 
     time = 0
-    dt = 0.001
-    time
-    while time<T_max:
-        pass
+    T_max = 25
+    dt = 0.01
+    estimated_variables = list()
+
+    ii = 0
+    while time < T_max:
+
+        state, derivative_state = solver.step(initial_state, dt)
+        estimated_variables.append(state)
+        initial_state = state
+        sys.stdout.write("\rIteration {}".format(ii))
+        sys.stdout.flush()
+        time += dt
+        ii += 1
+
+    estimated_variables = np.vstack(estimated_variables)
+
+    print("Extrpolation concluded.")
+
+    for ss in range(estimated_variables.shape[1]):
+
+        error = np.linalg.norm(estimated_variables[ss, :] - test_input_cube[ss, :], 2)
+        relative_error = error / np.linalg.norm(test_input_cube, 2)
+
+        print("Derivative series {}, L2 error evaluation: {}".format(ss, relative_error))
+
+        plt.plot(test_input_cube[:, ss], label="Target")
+        plt.plot(estimated_variables[:, ss], label="Estimated")
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+
