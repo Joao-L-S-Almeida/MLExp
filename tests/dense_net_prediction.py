@@ -35,16 +35,30 @@ if __name__ == "__main__":
     print("Estimating the test output using the trained model.")
 
     estimated_cube = model.predict(test_input_cube)
+    estimated_cube_noise1 = model.predict(1.01*test_input_cube)
+    estimated_cube_noise5 = model.predict(1.05*test_input_cube)
+    estimated_cube_noise10 = model.predict(1.10*test_input_cube)
 
     for ss in range(estimated_cube.shape[1]):
 
         error = np.linalg.norm(estimated_cube[ss, :] - test_output_cube[ss, :], 2)
-        relative_error = error / np.linalg.norm(test_output_cube, 2)
+        error_noise1 = np.linalg.norm(estimated_cube_noise1[ss, :] - test_output_cube[ss, :], 2)
+        error_noise5 = np.linalg.norm(estimated_cube_noise5[ss, :] - test_output_cube[ss, :], 2)
+        error_noise10 = np.linalg.norm(estimated_cube_noise10[ss, :] - test_output_cube[ss, :], 2)
+
+        relative_error = 100*error / np.linalg.norm(test_output_cube, 2)
+        relative_error_noise1 = 100*error_noise1 / np.linalg.norm(test_output_cube, 2)
+        relative_error_noise5 = 100*error_noise5 / np.linalg.norm(test_output_cube, 2)
+        relative_error_noise10 = 100*error_noise10 / np.linalg.norm(test_output_cube, 2)
 
         print("Derivative series {}, L2 error evaluation: {}".format(ss, relative_error))
+        print("Derivative series {}, noise at 1%, L2 error evaluation: {}".format(ss, relative_error_noise1))
+        print("Derivative series {}, noise at 5%, L2 error evaluation: {}".format(ss, relative_error_noise5))
+        print("Derivative series {}, noise at 10%, L2 error evaluation: {}".format(ss, relative_error_noise10))
 
         plt.plot(test_output_cube[:, ss], label="Target")
         plt.plot(estimated_cube[:, ss], label="Estimated")
+
         plt.legend()
         plt.grid(True)
         plt.show()
@@ -80,7 +94,7 @@ if __name__ == "__main__":
     for ss in range(estimated_variables.shape[1]):
 
         error = np.linalg.norm(estimated_variables[ss, :] - test_input_cube[ss, :], 2)
-        relative_error = error / np.linalg.norm(test_input_cube, 2)
+        relative_error = 100*error / np.linalg.norm(test_input_cube, 2)
 
         print("Variable series {}, L2 error evaluation: {}".format(ss, relative_error))
 
