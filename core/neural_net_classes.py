@@ -42,9 +42,11 @@ class DenseNetwork:
 
         return model
 
-    def fit(self, input_data, output_data):
+    def fit(self, input_data, output_data, model=None):
 
-        model = self.construct(input_data.shape[1], output_data.shape[1])
+        if not model:
+            model = self.construct(input_data.shape[1], output_data.shape[1])
+
         model.fit(input_data, output_data,
                   batch_size = input_data.shape[0],
                   epochs=self.n_epochs)
