@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from core.neural_net_classes import DenseNetwork
+from core.keras_applications.neural_net_classes import DenseNetwork
 
 if __name__ == "__main__":
 
@@ -24,14 +24,14 @@ if __name__ == "__main__":
     model_name = "Oscillator_surrogate.h5"
 
     test_setup = {
-                  'layers_cells_list': [100, 100],
+                  'layers_cells_list': [50, 50],
                   'dropouts_rates_list': [0, 0],
                   'learning_rate': 1e-05,
                   'l2_reg': 1e-06,
                   'activation_function': 'elu',
                   'loss_function': 'mse',
                   'optimizer': 'adam',
-                  'n_epochs': 10000
+                  'n_epochs': 20000
                   }
 
     neural_net = DenseNetwork(test_setup)
