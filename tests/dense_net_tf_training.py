@@ -19,7 +19,7 @@ if __name__ == "__main__":
     input_cube = variables[:training_dim, :]
     output_cube = derivatives[:training_dim, :]
 
-    model_name = "Oscillator_surrogate.h5"
+    model_name = "Oscillator_tf_surrogate"
 
     test_setup = {
                   'layers_cells_list': [2, 50, 50, 2],
@@ -29,7 +29,9 @@ if __name__ == "__main__":
                   'activation_function': 'elu',
                   'loss_function': 'mse',
                   'optimizer': 'adam',
-                  'n_epochs': 20000
+                  'n_epochs': 20000,
+                  'outputpath': data_path,
+                  'model_name': model_name
                   }
 
     neural_net = DenseNetwork(test_setup)

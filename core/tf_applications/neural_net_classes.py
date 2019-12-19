@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-
+import os
 from core.losses import loss_switcher
 
 class DenseNetwork:
@@ -15,6 +15,9 @@ class DenseNetwork:
         self.optimizer = setup['optimizer']
         self.loss_function = setup['loss_function']
         self.n_epochs = setup['n_epochs']
+        self.outputpath = setup['outputpath']
+        self.model_name = setup['model_name']
+
         self.model = None
 
         self.weights, self.biases = self.initialize_neural_net(self.layers_cells_list)
@@ -23,6 +26,8 @@ class DenseNetwork:
 
         self.sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True,
                                                      log_device_placement=True))
+
+        self.saver = tf.train.Saver()
 
         self.input_data_ph = tf.placeholder(tf.float32, shape=[None, input_dim])
         self.output_data_ph = tf.placeholder(tf.float32, shape=[None, output_dim])
@@ -45,8 +50,8 @@ class DenseNetwork:
         self.optimizer_Adam = tf.train.AdamOptimizer(learning_rate=self.learning_rate,
                                                                 beta1=0.9,
                                                                 beta2=0.999,
-                                                                epsilon=1e-08
-)
+                                                                epsilon=1e-08)
+
         self.train_op_Adam = self.optimizer_Adam.minimize(self.loss)
 
         init = tf.global_variables_initializer()
@@ -62,22 +67,26 @@ class DenseNetwork:
 
         for l in range(0, num_layers - 1):
 
-            W = self.xavier_init(size=[layers[l], layers[l + 1]])
-            b = tf.Variable(tf.zeros([1, layers[l + 1]], dtype=tf.float32), dtype=tf.float32)
+            W = self.xavier_init(size=[layers[l], layers[l + 1]], index=l)
+            b = tf.Variable(tf.zeros([1, layers[l + 1]], dtype=tf.float32),
+                            dtype=tf.float32,
+                            name='biases_{}'.format(l))
             weights.append(W)
             biases.append(b)
 
         return weights, biases
 
     # Based on https://github.com/maziarraissi/PINNs/blob/master/main/continuous_time_identification%20(Navier-Stokes)/NavierStokes.py
-    def xavier_init(self, size):
+    def xavier_init(self, size, index):
 
         in_dim = size[0]
         out_dim = size[1]
         xavier_stddev = np.sqrt(2 / (in_dim + out_dim))
 
         return tf.Variable(tf.random.truncated_normal([in_dim, out_dim],
-                                               stddev=xavier_stddev), dtype=tf.float32)
+                                               stddev=xavier_stddev),
+                                               dtype=tf.float32,
+                                               name='weights_{}'.format(index))
 
     def network(self, input_data, weights, biases):
 
@@ -96,6 +105,7 @@ class DenseNetwork:
         return Y
 
     def callback(self, loss):
+
         print('Loss: %.3e' % loss)
 
     def fit(self, input_data, output_data):
@@ -121,9 +131,12 @@ class DenseNetwork:
                                 fetches=[self.loss],
                                 loss_callback=self.callback)
 
-    def save(self, outputpath):
+        savepath = self.outputpath+self.outputpath+'/'
 
-        pass
+        if not os.path.isdir(savepath):
+            os.mkdir(savepath)
+
+        self.saver.save(self.sess, savepath + self.model_name)
 
     def load(self):
 
