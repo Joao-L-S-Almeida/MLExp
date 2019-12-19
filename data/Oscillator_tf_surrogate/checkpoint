@@ -1,0 +1,2 @@
+model_checkpoint_path: "Oscillator_tf_surrogate"
+all_model_checkpoint_paths: "Oscillator_tf_surrogate"
