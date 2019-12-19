@@ -1,6 +1,8 @@
 import numpy as np
 import tensorflow as tf
 
+from core.losses import loss_switcher
+
 class DenseNetwork:
 
     def __init__(self, setup):
@@ -27,7 +29,10 @@ class DenseNetwork:
         self.output_data_pred = self.network(self.input_data_ph, self.weights, self.biases)
 
 
-        self.loss = tf.reduce_sum(tf.square(self.output_data_ph - self.output_data_pred))
+        self.loss = loss_switcher(self.loss_function)(self.output_data_ph,
+                                                      self.output_data_pred,
+                                                      regularization_penalty=self.l2_reg,
+                                                      weights=self.weights)
 
         self.optimizer = tf.contrib.opt.ScipyOptimizerInterface(self.loss,
                                                                 method='L-BFGS-B',
@@ -37,7 +42,11 @@ class DenseNetwork:
                                                                          'maxls': 50,
                                                                          'ftol': 1.0 * np.finfo(float).eps})
 
-        self.optimizer_Adam = tf.train.AdamOptimizer()
+        self.optimizer_Adam = tf.train.AdamOptimizer(learning_rate=self.learning_rate,
+                                                                beta1=0.9,
+                                                                beta2=0.999,
+                                                                epsilon=1e-08
+)
         self.train_op_Adam = self.optimizer_Adam.minimize(self.loss)
 
         init = tf.global_variables_initializer()
@@ -78,7 +87,7 @@ class DenseNetwork:
 
             W = weights[ll]
             b = biases[ll]
-            H = tf.tanh(tf.add(tf.matmul(H, W), b))
+            H = tf.nn.elu(tf.add(tf.matmul(H, W), b))
 
         W = weights[-1]
         b = biases[-1]
@@ -112,7 +121,7 @@ class DenseNetwork:
                                 fetches=[self.loss],
                                 loss_callback=self.callback)
 
-    def save(self):
+    def save(self, outputpath):
 
         pass
 
