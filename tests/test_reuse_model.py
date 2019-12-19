@@ -3,8 +3,8 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from keras.models import load_model
-from core.neural_net_classes import DenseNetwork
-from core.initilization import DenseGraphDisturbance
+from core.keras_applications.neural_net_classes import DenseNetwork
+from core.keras_applications.initilization import DenseGraphDisturbance
 from numerics.timeint import RK4, FunctionWrapper
 
 if __name__ == "__main__":
@@ -34,9 +34,9 @@ if __name__ == "__main__":
     weights_previous = model_previous.get_weights()
 
     test_setup_disturbed = {
-        'layers_cells_list': [51, 50],  # [50, 50] + [1, 0]
+        'layers_cells_list': [50, 50],  # [50, 50] + [1, 0]
         'dropouts_rates_list': [0, 0],
-        'learning_rate': 1e-05,
+        'learning_rate': 1e-04,
         'l2_reg': 1e-06,
         'activation_function': 'elu',
         'loss_function': 'mse',
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     model_disturbed = neural_net_disturbed.construct(2, 2)
 
     graph_disturbing = DenseGraphDisturbance(weights_previous)
-    graph_disturbing.addition([0], [1])
+    #graph_disturbing.addition([0], [1])
 
     weights_current = graph_disturbing.weights_list
     model_disturbed.set_weights(weights_current)
