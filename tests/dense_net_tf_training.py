@@ -21,6 +21,9 @@ if __name__ == "__main__":
 
     model_name = "Oscillator_tf_surrogate"
 
+    input_dim = input_cube.shape[1]
+    output_dim = output_cube.shape[1]
+
     test_setup = {
                   'layers_cells_list': [2, 50, 50, 2],
                   'dropouts_rates_list': [0, 0],
@@ -31,7 +34,9 @@ if __name__ == "__main__":
                   'optimizer': 'adam',
                   'n_epochs': 20000,
                   'outputpath': data_path,
-                  'model_name': model_name
+                  'model_name': model_name,
+                  'input_dim': input_dim,
+                  'output_dim': output_dim
                   }
 
     neural_net = DenseNetwork(test_setup)

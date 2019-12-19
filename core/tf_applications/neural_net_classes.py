@@ -17,17 +17,14 @@ class DenseNetwork:
         self.n_epochs = setup['n_epochs']
         self.outputpath = setup['outputpath']
         self.model_name = setup['model_name']
-
-        self.model = None
-
-        self.weights, self.biases = self.initialize_neural_net(self.layers_cells_list)
+        self.savepath = self.outputpath + self.model_name + '/'
+        self.input_dim = setup['input_dim']
+        self.output_dim = setup['output_dim']
 
     def construct(self, input_dim, output_dim):
 
         self.sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True,
                                                      log_device_placement=True))
-
-        self.saver = tf.train.Saver()
 
         self.input_data_ph = tf.placeholder(tf.float32, shape=[None, input_dim])
         self.output_data_ph = tf.placeholder(tf.float32, shape=[None, output_dim])
@@ -110,10 +107,9 @@ class DenseNetwork:
 
     def fit(self, input_data, output_data):
 
-        input_dim = input_data.shape[1]
-        output_dim = output_data.shape[1]
-
-        self.construct(input_dim, output_dim)
+        self.weights, self.biases = self.initialize_neural_net(self.layers_cells_list)
+        self.saver = tf.train.Saver()
+        self.construct(self.input_dim, self.output_dim)
 
         var_map = {self.input_data_ph: input_data, self.output_data_ph: output_data}
 
@@ -131,16 +127,62 @@ class DenseNetwork:
                                 fetches=[self.loss],
                                 loss_callback=self.callback)
 
-        savepath = self.outputpath+self.outputpath+'/'
+        if not os.path.isdir(self.savepath):
+            os.mkdir(self.savepath)
 
-        if not os.path.isdir(savepath):
-            os.mkdir(savepath)
+        self.saver.save(self.sess, self.savepath + self.model_name)
 
-        self.saver.save(self.sess, savepath + self.model_name)
+    def restore_coeffs(self, layers):
 
-    def load(self):
+        weights = list()
+        biases = list()
+        num_layers = len(layers)
 
-        pass
+        for l in range(0, num_layers - 1):
 
+            W_array = self.sess.run('weights_{}:0'.format(l))
+            W = tf.Variable(tf.zeros(W_array.shape, dtype=tf.float32),
+                        dtype=tf.float32,
+                        name='biases_{}'.format(l))
+            W.load(W_array, self.sess)
 
+            b_array = self.sess.run('biases_{}:0'.format(l))
+            b = tf.Variable(tf.zeros(b_array.shape, dtype=tf.float32),
+                        dtype=tf.float32,
+                        name='biases_{}'.format(l))
+            b.load(b_array, self.sess)
+
+            weights.append(W)
+            biases.append(b)
+
+        return weights, biases
+
+    def restore(self):
+
+        self.sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True,
+                                                     log_device_placement=False))
+
+        init = tf.global_variables_initializer()
+
+        self.sess.run(init)
+
+        metafile = self.savepath + self.model_name + ".meta"
+
+        saver = tf.train.import_meta_graph(metafile)
+
+        saver.restore(self.sess, tf.train.latest_checkpoint(self.savepath))
+
+        self.weights, self.biases = self.restore_coeffs(self.layers_cells_list)
+
+        self.input_data_ph = tf.placeholder(tf.float32, shape=[None, self.input_dim])
+
+        self.output_data_expr = self.network(self.input_data_ph, self.weights, self.biases)
+
+    def predict(self, input_cube):
+
+        map_dict = {self.input_data_ph: input_cube}
+
+        output_data_estimated = self.sess.run(self.output_data_expr, map_dict)
+
+        return output_data_estimated
 
