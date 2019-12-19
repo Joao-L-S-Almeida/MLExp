@@ -1,3 +1,5 @@
+import sys
+
 import numpy as np
 
 from problem_classes import NonlinearOscillator
@@ -11,7 +13,7 @@ if __name__ == "__main__":
 
     initial_state = np.array([2, 0])
     T = 50
-    dt = 0.01
+    dt = 0.001
 
     problem = NonlinearOscillator()
 
@@ -30,6 +32,8 @@ if __name__ == "__main__":
         variables_timesteps.append(variables_state[:, None])
         derivatives_timesteps.append(derivatives_state[:, None])
         current_state = variables_state
+        sys.stdout.write("\rIteration {}".format(tt))
+        sys.stdout.flush()
 
     variables_matrix = np.hstack(variables_timesteps)
     derivatives_matrix = np.hstack(derivatives_timesteps)
