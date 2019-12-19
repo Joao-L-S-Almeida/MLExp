@@ -28,7 +28,7 @@ if __name__ == "__main__":
                   'layers_cells_list': [2, 50, 50, 2],
                   'dropouts_rates_list': [0, 0],
                   'learning_rate': 1e-05,
-                  'l2_reg': 1e-06,
+                  'l2_reg': 1e-05,
                   'activation_function': 'elu',
                   'loss_function': 'mse',
                   'optimizer': 'adam',

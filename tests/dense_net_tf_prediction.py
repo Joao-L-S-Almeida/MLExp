@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
     time = 0
     T_max = 25
-    dt = 0.01
+    dt = 0.001
     estimated_variables = list()
 
     ii = 0
