@@ -63,7 +63,7 @@ def exec_setups(setups, input_dim, output_dim, test_input_cube):
         errors_dict[setup_key] = relative_error
         print("Model constructed.")
 
-    return relative_error
+    return errors_dict
 
 if __name__ == "__main__":
 
