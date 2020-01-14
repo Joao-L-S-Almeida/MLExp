@@ -3,16 +3,16 @@ sys.path.insert(0, ".")
 import numpy as np
 from MLExp.core.tf_applications.neural_net_classes import DenseNetwork
 from numerics.timeint import RK4, FunctionWrapper
+from core.heuristics import TabuSearch
+
 import json
 
-def prediction(neural_net, test_output_cube):
+def prediction(neural_net, test_input_cube, initial_state):
 
     # Using the derivatives surrogate for time-integrating
     right_operator = FunctionWrapper(neural_net.predict)
 
     solver = RK4(right_operator)
-
-    initial_state = test_input_cube[-1, :]
 
     time = 0
     T_max = 25
@@ -35,14 +35,14 @@ def prediction(neural_net, test_output_cube):
     print("Extrapolation concluded.")
 
     for ss in range(estimated_variables.shape[1]):
-        error = np.linalg.norm(estimated_variables[ss, :] - test_output_cube[ss, :], 2)
+        error = np.linalg.norm(estimated_variables[ss, :] - test_input_cube[ss, :], 2)
         relative_error = 100 * error / np.linalg.norm(test_input_cube, 2)
 
         print("Variable series {}, L2 error evaluation: {}".format(ss, relative_error))
 
     return relative_error
 
-def exec_setups(setups, input_dim, output_dim, test_input_cube):
+def exec_setups(setups, input_dim, output_dim, test_input_cube, initial_state):
 
     errors_dict = dict()
 
@@ -59,7 +59,7 @@ def exec_setups(setups, input_dim, output_dim, test_input_cube):
 
         neural_net.fit(input_cube, output_cube)
 
-        relative_error = prediction(neural_net, test_input_cube)
+        relative_error = prediction(neural_net, test_input_cube, initial_state)
         errors_dict[setup_key] = relative_error
         print("Model constructed.")
 
@@ -92,6 +92,20 @@ if __name__ == "__main__":
 
     fp = open(setups_file, "r")
     setups = json.load(fp)
+    initial_state = input_cube[-1, :]
+    error_dict = exec_setups(setups, input_dim, output_dim, test_output_cube, initial_state)
+    key_min = min(error_dict, key=error_dict.get)
+    error_min = error_dict[key_min]
+    origin_setup = setups[key_min]
+    iter = 0
 
-    error_dict = exec_setups(setups, input_dim, output_dim, test_output_cube)
+    iter_max = 10
+    tol = 2.0
+
+    tabu_search_config = {'n_disturbances': 10, 'disturbance_list': {'layers_cells_list':1}}
+
+    while error_min > tol or iter < iter_max:
+        tabu_search = TabuSearch(tabu_search_config)
+        new_setups = tabu_search(origin_setup)
+        print("Iteration {} execited".format(iter))
     print("Execution concluded.")

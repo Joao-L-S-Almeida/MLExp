@@ -13,28 +13,32 @@ class TabuSearch:
 
         modified_setup = origin_setup
 
-        for ii, (field, field_value) in enumerate(origin_setup.items()):
+        for field, field_value in self.disturbance_list.items():
 
-            if isinstance(field_value, list):
+            if isinstance(origin_setup[field], list):
 
-                lenght = len(field_value)
-                disturbance = self.disturbance_list[ii]
-                interval = np.arange(-disturbance, disturbance, 1)
+                lenght = len(origin_setup[field])
+                disturbance = field_value
+                interval = np.arange(-disturbance, disturbance+1, 1)
                 disturbances = [random.choice(interval) for jj in range(lenght)]
-                disturbed = np.array(origin_setup) + np.array(disturbance)
+                disturbances[0] = 0
+                disturbances[-1] = 0
+                disturbed = np.array(origin_setup[field]) + np.array(disturbance)
                 disturbed = disturbed.tolist()
 
                 modified_setup[field] = disturbed
 
             else:
 
-                disturbance = self.disturbance_list[ii]
+                disturbance = self.disturbance_list[field]
                 interval = np.arange(-disturbance, disturbance, 1)
                 disturbance = random.choice(interval)
-                disturbed = np.array(origin_setup) + np.array(disturbance)
+                disturbed = np.array(origin_setup[field]) + np.array(disturbance)
                 disturbed = disturbed.tolist()
 
                 modified_setup[field] = disturbed
+
+        return modified_setup
 
     def __call__(self, origin_setup_0):
 
