@@ -102,10 +102,23 @@ if __name__ == "__main__":
     iter_max = 10
     tol = 2.0
 
-    tabu_search_config = {'n_disturbances': 10, 'disturbance_list': {'layers_cells_list':1}}
+    tabu_search_config = {'n_disturbances': 5, 'disturbance_list': {'layers_cells_list':1}}
 
     while error_min > tol or iter < iter_max:
+
         tabu_search = TabuSearch(tabu_search_config)
-        new_setups = tabu_search(origin_setup)
-        print("Iteration {} execited".format(iter))
+        new_setups = tabu_search(origin_setup, key_min)
+
+        error_dict = exec_setups(new_setups, input_dim, output_dim, test_output_cube, initial_state)
+        key_min = min(error_dict, key=error_dict.get)
+        error_min_current = error_dict[key_min]
+
+        if error_min_current < error_min:
+
+            origin_setup = new_setups[key_min]
+            error_min = error_min_current
+
+        print("Iteration {} executed".format(iter))
+        print("Error: {}".format(error_min))
+
     print("Execution concluded.")

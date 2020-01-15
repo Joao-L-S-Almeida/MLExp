@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import copy
 
 class TabuSearch:
 
@@ -11,7 +12,7 @@ class TabuSearch:
 
     def generate(self, origin_setup):
 
-        modified_setup = origin_setup
+        modified_setup = copy.copy(origin_setup)
 
         for field, field_value in self.disturbance_list.items():
 
@@ -23,7 +24,7 @@ class TabuSearch:
                 disturbances = [random.choice(interval) for jj in range(lenght)]
                 disturbances[0] = 0
                 disturbances[-1] = 0
-                disturbed = np.array(origin_setup[field]) + np.array(disturbance)
+                disturbed = np.array(origin_setup[field]) + np.array(disturbances)
                 disturbed = disturbed.tolist()
 
                 modified_setup[field] = disturbed
@@ -31,7 +32,7 @@ class TabuSearch:
             else:
 
                 disturbance = self.disturbance_list[field]
-                interval = np.arange(-disturbance, disturbance, 1)
+                interval = np.arange(-disturbance, disturbance+1, 1)
                 disturbance = random.choice(interval)
                 disturbed = np.array(origin_setup[field]) + np.array(disturbance)
                 disturbed = disturbed.tolist()
@@ -40,19 +41,23 @@ class TabuSearch:
 
         return modified_setup
 
-    def __call__(self, origin_setup_0):
+    def __call__(self, origin_setup_0, basis_key):
 
         self.tabu_list.append(origin_setup_0)
         origin_setup = origin_setup_0
 
-        new_setups = list()
+        new_setups = dict()
 
-        while len(new_setups) < self.n_disturbances:
+        iter = 0
+
+        while len(new_setups.keys()) < self.n_disturbances:
 
             new_setup = self.generate(origin_setup)
 
-            if isinstance(new_setup, list):
-                new_setups.append(new_setup)
+            key = basis_key + '_' + str(iter)
+            new_setups[key] = new_setup
+
+            iter += 1
 
         return new_setups
 
