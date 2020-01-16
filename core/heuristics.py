@@ -54,8 +54,10 @@ class TabuSearch:
 
             new_setup = self.generate(origin_setup)
 
-            key = basis_key + '_' + str(iter)
-            new_setups[key] = new_setup
+            if new_setup not in self.tabu_list:
+
+                key = basis_key + '_' + str(iter)
+                new_setups[key] = new_setup
 
             iter += 1
 

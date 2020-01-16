@@ -7,16 +7,17 @@ from core.heuristics import TabuSearch
 
 import json
 
-def prediction(neural_net, test_input_cube, initial_state):
+def prediction(neural_net, test_input_cube, choices, initial_state):
 
     # Using the derivatives surrogate for time-integrating
     right_operator = FunctionWrapper(neural_net.predict)
 
     solver = RK4(right_operator)
 
-    time = 0
-    T_max = 25
-    dt = 0.001
+    time = choices['time']
+    T_max = choices['T_max']
+    dt = choices['dt']
+
     estimated_variables = list()
 
     ii = 0
@@ -42,7 +43,7 @@ def prediction(neural_net, test_input_cube, initial_state):
 
     return relative_error
 
-def exec_setups(setups, input_dim, output_dim, test_input_cube, initial_state):
+def exec_setups(setups, input_dim, output_dim, test_input_cube, choices, initial_state):
 
     errors_dict = dict()
 
@@ -59,7 +60,7 @@ def exec_setups(setups, input_dim, output_dim, test_input_cube, initial_state):
 
         neural_net.fit(input_cube, output_cube)
 
-        relative_error = prediction(neural_net, test_input_cube, initial_state)
+        relative_error = prediction(neural_net, test_input_cube, choices, initial_state)
         errors_dict[setup_key] = relative_error
         print("Model constructed.")
 
@@ -93,7 +94,14 @@ if __name__ == "__main__":
     fp = open(setups_file, "r")
     setups = json.load(fp)
     initial_state = input_cube[-1, :]
-    error_dict = exec_setups(setups, input_dim, output_dim, test_output_cube, initial_state)
+
+    choices = {
+                'time': 0,
+                'T_max': 25,
+                'dt':  0.001
+              }
+
+    error_dict = exec_setups(setups, input_dim, output_dim, test_output_cube, choices, initial_state)
     key_min = min(error_dict, key=error_dict.get)
     error_min = error_dict[key_min]
     origin_setup = setups[key_min]
@@ -102,14 +110,14 @@ if __name__ == "__main__":
     iter_max = 10
     tol = 2.0
 
-    tabu_search_config = {'n_disturbances': 5, 'disturbance_list': {'layers_cells_list':1}}
+    tabu_search_config = {'n_disturbances': 5, 'disturbance_list': {'layers_cells_list':2}}
 
     while error_min > tol or iter < iter_max:
 
         tabu_search = TabuSearch(tabu_search_config)
         new_setups = tabu_search(origin_setup, key_min)
 
-        error_dict = exec_setups(new_setups, input_dim, output_dim, test_output_cube, initial_state)
+        error_dict = exec_setups(new_setups, input_dim, output_dim, test_output_cube, choices, initial_state)
         key_min = min(error_dict, key=error_dict.get)
         error_min_current = error_dict[key_min]
 
