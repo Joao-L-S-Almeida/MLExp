@@ -19,7 +19,7 @@ parser.add_argument('--path', type=str)
 
 args = parser.parse_args()
 
-path = "C:\\Users\\JLSA\\Projetos\\pitzDaily\\VTK\\" #args.path 
+path = args.path
 
 items = [path + ii for ii in os.listdir(path)]
 data_directories = list(filter(os.path.isdir, items))
