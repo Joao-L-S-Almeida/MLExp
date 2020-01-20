@@ -1,4 +1,5 @@
 import sys
+sys.path.insert(0,'.')
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,9 +10,11 @@ from numerics.timeint import RK4, FunctionWrapper
 if __name__ == "__main__":
 
     data_path = 'MLExp/data/'
+    case = "Oscillator"
+    #case = "Lorenz"
 
-    variables_file = data_path + 'Oscillator_variables.npy'
-    derivatives_file = data_path + 'Oscillator_derivatives.npy'
+    variables_file = data_path + case + '_variables.npy'
+    derivatives_file = data_path + case + '_derivatives.npy'
 
     variables = np.load(variables_file)
     derivatives = np.load(derivatives_file)
@@ -27,7 +30,7 @@ if __name__ == "__main__":
     test_input_cube = variables[training_dim:, :]
     test_output_cube = derivatives[training_dim:, :]
 
-    model_name = "Oscillator_tf_surrogate"
+    model_name = case + "_tf_surrogate"
 
     input_dim = input_cube.shape[1]
     output_dim = output_cube.shape[1]
@@ -80,6 +83,8 @@ if __name__ == "__main__":
 
         plt.legend()
         plt.grid(True)
+        plt.title("Derivative series of the variable {}".format(ss))
+        plt.savefig(data_path + '_' + case + "_derivative_series_{}".format(ss))
         plt.show()
 
     # Using the derivatives surrogate for time-integrating
@@ -97,6 +102,7 @@ if __name__ == "__main__":
     ii = 0
     # Approach based on Lui & Wolf (https://arxiv.org/abs/1903.05206)
     while time < T_max:
+
         state, derivative_state = solver.step(initial_state, dt)
         estimated_variables.append(state)
         initial_state = state
@@ -120,6 +126,8 @@ if __name__ == "__main__":
         plt.plot(estimated_variables[:, ss], label="Estimated")
         plt.legend()
         plt.grid(True)
+        plt.title("Variable {}".format(ss))
+        plt.savefig(data_path + '_' + case + '_variable_series_{}.png'.format(ss))
         plt.show()
 
     print('Model restored.')
