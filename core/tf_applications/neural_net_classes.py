@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 import os
-from core.losses import loss_switcher
+from MLExp.core.losses import loss_switcher
 
 class DenseNetwork:
 
@@ -110,6 +110,7 @@ class DenseNetwork:
         self.weights, self.biases = self.initialize_neural_net(self.layers_cells_list)
         self.saver = tf.train.Saver()
         self.construct(self.input_dim, self.output_dim)
+        self.output_data_expr = self.network(self.input_data_ph, self.weights, self.biases)
 
         var_map = {self.input_data_ph: input_data, self.output_data_ph: output_data}
 
