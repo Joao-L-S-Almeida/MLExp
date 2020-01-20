@@ -20,11 +20,7 @@ if __name__ == "__main__":
 
     data_path = args.data_path
     case = args.case
-
-    #data_path = 'MLExp/data/'
-    #case = "Oscillator"
-    #case = "Lorenz"
-
+    
     variables_file = data_path + case + '_variables.npy'
     derivatives_file = data_path + case + '_derivatives.npy'
 
