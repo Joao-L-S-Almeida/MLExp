@@ -69,9 +69,10 @@ def exec_setups(setups, input_dim, output_dim, test_input_cube, choices, initial
 if __name__ == "__main__":
 
     data_path = 'MLExp/data/'
+    case = 'Oscillator'
 
-    variables_file = data_path + 'Oscillator_variables.npy'
-    derivatives_file = data_path + 'Oscillator_derivatives.npy'
+    variables_file = data_path + case + '_variables.npy'
+    derivatives_file = data_path + case + '_derivatives.npy'
     setups_file = data_path + "setups.json"
 
     variables = np.load(variables_file)
