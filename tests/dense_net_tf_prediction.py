@@ -92,7 +92,7 @@ if __name__ == "__main__":
 
     solver = RK4(right_operator)
 
-    initial_state = test_input_cube[-1, :]
+    initial_state = input_cube[-1, :]
 
     time = 0
     T_max = 25
