@@ -3,11 +3,18 @@ sys.path.insert(0, ".")
 import numpy as np
 from MLExp.core.tf_applications.neural_net_classes import DenseNetwork
 
+from argparse import ArgumentParser
+
 if __name__ == "__main__":
 
-    data_path = 'MLExp/data/'
-    #case = 'Oscillator'
-    case = 'Lorenz'
+    parser = ArgumentParser(description="Reading input arguments")
+    parser.add_argument('--data_path', type=str)
+    parser.add_argument('--case', type=str)
+
+    args = parser.parse_args()
+
+    data_path = args.data_path
+    case = args.case
 
     variables_file = data_path + case + '_variables.npy'
     derivatives_file = data_path + case + '_derivatives.npy'
@@ -29,8 +36,8 @@ if __name__ == "__main__":
     output_dim = output_cube.shape[1]
 
     test_setup = {
-                  'layers_cells_list': [input_dim, 50, 50, output_dim],
-                  'dropouts_rates_list': [0, 0],
+                  'layers_cells_list': [input_dim, 50, 50, 50, 50, 50, output_dim],
+                  'dropouts_rates_list': [0, 0, 0, 0, 0],
                   'learning_rate': 1e-05,
                   'l2_reg': 1e-05,
                   'activation_function': 'elu',
@@ -43,9 +50,7 @@ if __name__ == "__main__":
                   'output_dim': output_dim
                   }
 
-
     neural_net = DenseNetwork(test_setup)
-
 
     neural_net.fit(input_cube, output_cube)
 

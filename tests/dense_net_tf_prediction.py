@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
     data_path = args.data_path
     case = args.case
-    
+
     variables_file = data_path + case + '_variables.npy'
     derivatives_file = data_path + case + '_derivatives.npy'
 
@@ -44,8 +44,8 @@ if __name__ == "__main__":
     output_dim = output_cube.shape[1]
 
     test_setup = {
-        'layers_cells_list': [2, 50, 50, 2],
-        'dropouts_rates_list': [0, 0],
+        'layers_cells_list': [input_dim, 50, 20, 50, 20, 10, output_dim],
+        'dropouts_rates_list': [0, 0, 0, 0, 0],
         'learning_rate': 1e-05,
         'l2_reg': 1e-06,
         'activation_function': 'elu',
@@ -104,8 +104,12 @@ if __name__ == "__main__":
 
     time = 0
     T_max = 25
-    dt = 0.0001
+    dt = 0.001
     estimated_variables = list()
+
+    N_steps = int(T_max/dt)
+    n_steps = test_input_cube.shape[0]
+    interval = int(N_steps/n_steps)
 
     ii = 0
     # Approach based on Lui & Wolf (https://arxiv.org/abs/1903.05206)
@@ -131,7 +135,7 @@ if __name__ == "__main__":
         print("Variable series {}, L2 error evaluation: {}".format(ss, relative_error))
 
         plt.plot(test_input_cube[:, ss], label="Target")
-        plt.plot(estimated_variables[:, ss], label="Estimated")
+        plt.plot(estimated_variables[::interval, ss], label="Estimated")
         plt.legend()
         plt.grid(True)
         plt.title("Variable {}".format(ss))
