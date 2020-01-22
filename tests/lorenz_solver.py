@@ -1,4 +1,4 @@
-import sys
+import sys, os
 sys.path.insert(0, '.')
 
 import numpy as np
@@ -60,10 +60,13 @@ if __name__ == "__main__":
     plt.plot(time, variables_matrix[1, :], label="y")
     plt.plot(time, variables_matrix[2, :], label="z")
 
-    label_string = "rho_{}_sigma_{}_beta_{}_T_{}_dt_{}".format(rho, sigma, beta, T, dt)
+    label_string = "rho_{}_sigma_{}_beta_{}_T_{}_dt_{}/".format(rho, sigma, beta, T, dt)
 
-    np.save(data_path + "Lorenz_variables_{}.npy".format(label_string), variables_matrix)
-    np.save(data_path + "Lorenz_derivatives_{}.npy".format(label_string), derivatives_matrix)
+    if not os.path.isdir(data_path + label_string):
+        os.mkdir(data_path + label_string)
+
+    np.save(data_path + "{}Lorenz_variables.npy".format(label_string), variables_matrix)
+    np.save(data_path + "{}Lorenz_derivatives.npy".format(label_string), derivatives_matrix)
 
     plt.xlabel("Time(s)")
     plt.title("Lorenz System")
