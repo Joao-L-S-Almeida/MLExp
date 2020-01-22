@@ -1,19 +1,31 @@
-import sys
+import sys, os
+sys.path.insert(0,'.')
 
 import numpy as np
 
-from problem_classes import NonlinearOscillator
-from numerics.timeint import RK4
+from MLExp.tests.problem_classes import NonlinearOscillator
+from MLExp.numerics.timeint import RK4
 import matplotlib.pyplot as plt
+
+from argparse import ArgumentParser
 
 # Testing to solve a nonlinear oscillator problem using
 # a 4th order and a four steps Runge-Kutta
 
 if __name__ == "__main__":
 
+    parser = ArgumentParser(description="Reading input arguments")
+    parser.add_argument('--data_path', type=str)
+    parser.add_argument('--time', type=float)
+    parser.add_argument('--dt', type=float)
+
+    args = parser.parse_args()
+
+    data_path = args.data_path
+    T = args.time
+    dt = args.dt
+
     initial_state = np.array([2, 0])
-    T = 50
-    dt = 0.001
 
     problem = NonlinearOscillator()
 
@@ -41,8 +53,13 @@ if __name__ == "__main__":
     plt.plot(time, variables_matrix[0, :], label="x")
     plt.plot(time, variables_matrix[1, :], label="y")
 
-    np.save("MLExp/data/Oscillator_variables.npy", variables_matrix)
-    np.save("MLExp/data/Oscillator_derivatives.npy", derivatives_matrix)
+    label_string = "T_{}_dt_{}/".format(T, dt)
+
+    if not os.path.isdir(data_path + label_string):
+        os.mkdir(data_path + label_string)
+
+    np.save(data_path + "{}Oscillator_variables.npy".format(label_string), variables_matrix)
+    np.save(data_path + "{}Oscillator_derivatives.npy".format(label_string), derivatives_matrix)
 
     plt.xlabel("Time(s)")
     plt.title("Nonlinear Oscillator")
