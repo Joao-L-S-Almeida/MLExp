@@ -4,8 +4,8 @@ sys.path.insert(0,'.')
 import numpy as np
 import matplotlib.pyplot as plt
 
-from core.tf_applications.neural_net_classes import DenseNetwork
-from numerics.timeint import RK4, FunctionWrapper
+from MLExp.core.tf_applications.neural_net_classes import DenseNetwork
+from MLExp.numerics.timeint import RK4, FunctionWrapper
 
 from argparse import ArgumentParser
 
@@ -15,11 +15,15 @@ if __name__ == "__main__":
     parser = ArgumentParser(description="Reading input arguments")
     parser.add_argument('--data_path', type=str)
     parser.add_argument('--case', type=str)
+    parser.add_argument('--time', type=float)
+    parser.add_argument('--dt', type=float)
 
     args = parser.parse_args()
 
     data_path = args.data_path
     case = args.case
+    T_max = args.time
+    dt = args.dt
 
     variables_file = data_path + case + '_variables.npy'
     derivatives_file = data_path + case + '_derivatives.npy'
@@ -39,12 +43,13 @@ if __name__ == "__main__":
     test_output_cube = derivatives[training_dim:, :]
 
     model_name = case + "_tf_surrogate"
+    log_file = data_path + 'log.out'
 
     input_dim = input_cube.shape[1]
     output_dim = output_cube.shape[1]
 
     test_setup = {
-        'layers_cells_list': [input_dim, 50, 20, 50, 20, 10, output_dim],
+        'layers_cells_list': [input_dim, 50, 50, 50, 50, 50, output_dim],
         'dropouts_rates_list': [0, 0, 0, 0, 0],
         'learning_rate': 1e-05,
         'l2_reg': 1e-06,
@@ -69,6 +74,8 @@ if __name__ == "__main__":
     estimated_cube_noise5 = neural_net.predict(1.05 * test_input_cube)
     estimated_cube_noise10 = neural_net.predict(1.10 * test_input_cube)
 
+    fp = open(log_file, 'w')
+
     for ss in range(estimated_cube.shape[1]):
 
         error = np.linalg.norm(estimated_cube[ss, :] - test_output_cube[ss, :], 2)
@@ -81,10 +88,21 @@ if __name__ == "__main__":
         relative_error_noise5 = 100 * error_noise5 / np.linalg.norm(test_output_cube, 2)
         relative_error_noise10 = 100 * error_noise10 / np.linalg.norm(test_output_cube, 2)
 
-        print("Derivative series {}, L2 error evaluation: {}".format(ss, relative_error))
-        print("Derivative series {}, noise at 1%, L2 error evaluation: {}".format(ss, relative_error_noise1))
-        print("Derivative series {}, noise at 5%, L2 error evaluation: {}".format(ss, relative_error_noise5))
-        print("Derivative series {}, noise at 10%, L2 error evaluation: {}".format(ss, relative_error_noise10))
+        log_string_1 = "Derivative series {}, L2 error evaluation: {}".format(ss, relative_error)
+        print(log_string_1)
+        fp.writelines(log_string_1 + '\n')
+
+        log_string_2 = "Derivative series {}, noise at 1%, L2 error evaluation: {}".format(ss, relative_error_noise1)
+        print(log_string_2)
+        fp.writelines(log_string_2 + '\n')
+
+        log_string_3 = "Derivative series {}, noise at 5%, L2 error evaluation: {}".format(ss, relative_error_noise5)
+        print(log_string_3)
+        fp.writelines(log_string_3 + '\n')
+
+        log_string_4 = "Derivative series {}, noise at 10%, L2 error evaluation: {}".format(ss, relative_error_noise10)
+        print(log_string_4)
+        fp.writelines(log_string_4 + '\n')
 
         plt.plot(test_output_cube[:, ss], label="Target")
         plt.plot(estimated_cube[:, ss], label="Estimated")
@@ -103,8 +121,6 @@ if __name__ == "__main__":
     initial_state = input_cube[-1, :]
 
     time = 0
-    T_max = 25
-    dt = 0.001
     estimated_variables = list()
 
     N_steps = int(T_max/dt)
@@ -132,7 +148,9 @@ if __name__ == "__main__":
         error = np.linalg.norm(estimated_variables[ss, :] - test_input_cube[ss, :], 2)
         relative_error = 100 * error / np.linalg.norm(test_input_cube, 2)
 
-        print("Variable series {}, L2 error evaluation: {}".format(ss, relative_error))
+        log_string = "Variable series {}, L2 error evaluation: {}".format(ss, relative_error)
+        print(log_string)
+        fp.writelines(log_string + '\n')
 
         plt.plot(test_input_cube[:, ss], label="Target")
         plt.plot(estimated_variables[::interval, ss], label="Estimated")
@@ -141,5 +159,7 @@ if __name__ == "__main__":
         plt.title("Variable {}".format(ss))
         plt.savefig(data_path + '_' + case + '_variable_series_{}.png'.format(ss))
         plt.show()
+
+    fp.close()
 
     print('Model restored.')

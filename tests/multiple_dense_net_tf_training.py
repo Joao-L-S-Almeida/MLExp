@@ -2,8 +2,9 @@ import sys
 sys.path.insert(0, ".")
 import numpy as np
 from MLExp.core.tf_applications.neural_net_classes import DenseNetwork
-from numerics.timeint import RK4, FunctionWrapper
-from core.heuristics import TabuSearch
+from MLExp.numerics.timeint import RK4, FunctionWrapper
+from MLExp.core.heuristics import TabuSearch
+from argparse import ArgumentParser
 
 import json
 
@@ -68,8 +69,18 @@ def exec_setups(setups, input_dim, output_dim, test_input_cube, choices, initial
 
 if __name__ == "__main__":
 
-    data_path = 'MLExp/data/'
-    case = 'Oscillator'
+    parser = ArgumentParser(description="Reading input arguments")
+    parser.add_argument('--data_path', type=str)
+    parser.add_argument('--case', type=str)
+    parser.add_argument('--time', type=float)
+    parser.add_argument('--dt', type=float)
+
+    args = parser.parse_args()
+
+    data_path = args.data_path
+    case = args.case
+    T = args.time
+    dt = args.dt
 
     variables_file = data_path + case + '_variables.npy'
     derivatives_file = data_path + case + '_derivatives.npy'
@@ -98,15 +109,15 @@ if __name__ == "__main__":
 
     choices = {
                 'time': 0,
-                'T_max': 25,
-                'dt':  0.001
+                'T_max': T,
+                'dt': dt
               }
 
     error_dict = exec_setups(setups, input_dim, output_dim, test_output_cube, choices, initial_state)
     key_min = min(error_dict, key=error_dict.get)
     error_min = error_dict[key_min]
     origin_setup = setups[key_min]
-    iter = 0
+    iter = 0    
 
     iter_max = 10
     tol = 2.0
