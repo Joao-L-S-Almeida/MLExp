@@ -24,7 +24,7 @@ class DenseNetwork:
     def construct(self, input_dim, output_dim):
 
         self.sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True,
-                                                     log_device_placement=True))
+                                                     log_device_placement=False))
 
         self.input_data_ph = tf.placeholder(tf.float32, shape=[None, input_dim])
         self.output_data_ph = tf.placeholder(tf.float32, shape=[None, output_dim])
