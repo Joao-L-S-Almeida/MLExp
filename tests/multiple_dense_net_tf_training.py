@@ -8,7 +8,7 @@ from argparse import ArgumentParser
 
 import json
 
-def prediction(neural_net, test_input_cube, choices, initial_state):
+def prediction(neural_net, test_input_cube, choices, initial_state, log_path):
 
     # Using the derivatives surrogate for time-integrating
     right_operator = FunctionWrapper(neural_net.predict)
@@ -18,6 +18,8 @@ def prediction(neural_net, test_input_cube, choices, initial_state):
     time = choices['time']
     T_max = choices['T_max']
     dt = choices['dt']
+
+    fp = open(log_path, 'a+')
 
     estimated_variables = list()
 
@@ -32,21 +34,29 @@ def prediction(neural_net, test_input_cube, choices, initial_state):
         time += dt
         ii += 1
 
-    estimated_variables = np.vstack(estimated_variables)
+    estimated_variables = np.vstack(estimated_variables)[:-1, :]
 
     print("Extrapolation concluded.")
 
     for ss in range(estimated_variables.shape[1]):
-        error = np.linalg.norm(estimated_variables[ss, :] - test_input_cube[ss, :], 2)
-        relative_error = 100 * error / np.linalg.norm(test_input_cube, 2)
 
-        print("Variable series {}, L2 error evaluation: {}".format(ss, relative_error))
+        error = np.linalg.norm(estimated_variables[:, ss] - test_input_cube[:, ss], 2)
+        relative_error = 100 * error / np.linalg.norm(test_input_cube[:, ss], 2)
+        log_string = "Variable series {}, L2 error evaluation: {}".format(ss, relative_error)
+        print(log_string)
+        fp.writelines(log_string + '\n')
+
+    fp.writelines("\n")
+
+    fp.close()
 
     return relative_error
 
-def exec_setups(setups, input_dim, output_dim, test_input_cube, choices, initial_state):
+def exec_setups(setups, input_dim, output_dim, test_input_cube, choices, initial_state, log_path, iter):
 
     errors_dict = dict()
+    fp = open(log_path, 'a+')
+    fp.writelines("Iteration {} \n".format(iter))
 
     for setup_key, test_setup in setups.items():
 
@@ -61,7 +71,8 @@ def exec_setups(setups, input_dim, output_dim, test_input_cube, choices, initial
 
         neural_net.fit(input_cube, output_cube)
 
-        relative_error = prediction(neural_net, test_input_cube, choices, initial_state)
+        relative_error = prediction(neural_net, test_input_cube, choices, initial_state, log_path)
+
         errors_dict[setup_key] = relative_error
         print("Model constructed.")
 
@@ -113,23 +124,33 @@ if __name__ == "__main__":
                 'dt': dt
               }
 
-    error_dict = exec_setups(setups, input_dim, output_dim, test_output_cube, choices, initial_state)
+    log_path = data_path + 'log.out'
+    fp = open(log_path, 'w')
+    fp.writelines("Execution log\n")
+    fp.close()
+
+    iter = 0
+    error_dict = exec_setups(setups, input_dim, output_dim,
+                             test_input_cube, choices, initial_state, log_path, iter)
+    iter += 1
+
     key_min = min(error_dict, key=error_dict.get)
     error_min = error_dict[key_min]
     origin_setup = setups[key_min]
-    iter = 0    
 
-    iter_max = 10
+    iter_max = 2
     tol = 2.0
 
-    tabu_search_config = {'n_disturbances': 5, 'disturbance_list': {'layers_cells_list':2}}
+    tabu_search_config = {'n_disturbances': 5, 'disturbance_list': {'layers_cells_list': 2}}
 
     while error_min > tol or iter < iter_max:
 
         tabu_search = TabuSearch(tabu_search_config)
         new_setups = tabu_search(origin_setup, key_min)
 
-        error_dict = exec_setups(new_setups, input_dim, output_dim, test_output_cube, choices, initial_state)
+        error_dict = exec_setups(new_setups, input_dim, output_dim,
+                                 test_input_cube, choices, initial_state, log_path, iter)
+
         key_min = min(error_dict, key=error_dict.get)
         error_min_current = error_dict[key_min]
 
@@ -138,7 +159,13 @@ if __name__ == "__main__":
             origin_setup = new_setups[key_min]
             error_min = error_min_current
 
+        iter += 1
+
         print("Iteration {} executed".format(iter))
         print("Error: {}".format(error_min))
+
+    jf = open(data_path + "chosen_setup.json", "w")
+    json.dump(origin_setup, jf)
+    jf.close()
 
     print("Execution concluded.")
