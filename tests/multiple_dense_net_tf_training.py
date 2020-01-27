@@ -137,10 +137,13 @@ if __name__ == "__main__":
     error_min = error_dict[key_min]
     origin_setup = setups[key_min]
 
-    iter_max = 10
+    iter_max = 5
     tol = 2.0
 
-    tabu_search_config = {'n_disturbances': 5, 'disturbance_list': {'layers_cells_list': 2}}
+    tabu_search_config = {
+                            'n_disturbances': 5,
+                            'disturbance_list': {'layers_cells_list': 2}
+                         }
 
     while (error_min >= tol) and (iter <= iter_max):
 
