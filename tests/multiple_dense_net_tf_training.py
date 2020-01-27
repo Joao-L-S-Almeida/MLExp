@@ -128,7 +128,6 @@ if __name__ == "__main__":
     fp = open(log_path, 'w')
     fp.writelines("Execution log\n")
     fp.close()
-
     iter = 0
     error_dict = exec_setups(setups, input_dim, output_dim,
                              test_input_cube, choices, initial_state, log_path, iter)
@@ -138,12 +137,12 @@ if __name__ == "__main__":
     error_min = error_dict[key_min]
     origin_setup = setups[key_min]
 
-    iter_max = 2
+    iter_max = 10
     tol = 2.0
 
     tabu_search_config = {'n_disturbances': 5, 'disturbance_list': {'layers_cells_list': 2}}
 
-    while error_min > tol or iter < iter_max:
+    while (error_min >= tol) and (iter <= iter_max):
 
         tabu_search = TabuSearch(tabu_search_config)
         new_setups = tabu_search(origin_setup, key_min)
