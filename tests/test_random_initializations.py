@@ -33,13 +33,10 @@ def prediction(neural_net, test_input_cube, choices, initial_state):
 
     print("Extrapolation concluded.")
 
-    for ss in range(estimated_variables.shape[1]):
-
-        error = np.linalg.norm(estimated_variables[:, ss] - test_input_cube[:, ss], 2)
-        relative_error = 100 * error / np.linalg.norm(test_input_cube[:, ss], 2)
-        log_string = "Variable series {}, L2 error evaluation: {}".format(ss, relative_error)
-        print(log_string)
-
+    error = np.linalg.norm(estimated_variables - test_input_cube, 2)
+    relative_error = 100 * error / np.linalg.norm(test_input_cube, 2)
+    log_string = "Variable series {}, L2 error evaluation: {}".format(ss, relative_error)
+    print(log_string)
 
     return relative_error
 
@@ -80,7 +77,7 @@ if __name__ == "__main__":
                   'layers_cells_list': [input_dim, 50, 50, 50, output_dim],
                   'dropouts_rates_list': [0, 0, 0],
                   'learning_rate': 1e-05,
-                  'l2_reg': 1e-05,
+                  'l2_reg': 1e-06,
                   'activation_function': 'elu',
                   'loss_function': 'mse',
                   'optimizer': 'adam',
@@ -112,7 +109,7 @@ if __name__ == "__main__":
         error = prediction(neural_net, test_input_cube, choices, initial_state)
         errors.append(error)
 
-    errors = np.array(error)
+    errors = np.array(errors)
 
     print("Model constructed.")
 
