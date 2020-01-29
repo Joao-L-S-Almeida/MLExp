@@ -179,15 +179,33 @@ class DenseNetwork:
 
         self.output_data_expr = self.network(self.input_data_ph, self.weights, self.biases)
 
-    def get_weights(self, layer_index):
+    def get_weights(self, layer_index=None):
 
-        weights = self.sess.run(self.weights[layer_index])
+        if layer_index:
+
+            weights = self.sess.run(self.weights[layer_index])
+
+        else:
+
+            weights = list()
+            for weight_tensor in self.weights:
+                weight = self.sess.run(weight_tensor)
+                weights.append(weight)
 
         return weights
 
-    def get_biases(self, layer_index):
+    def get_biases(self, layer_index=None):
 
-        biases = self.sess.run(self.biases[layer_index])
+        if layer_index:
+
+            biases = self.sess.run(self.biases[layer_index])
+
+        else:
+
+            biases = list()
+            for bias_tensor in self.biases:
+                bias = self.sess.run(bias_tensor)
+                biases.append(bias)
 
         return biases
 
