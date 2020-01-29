@@ -21,6 +21,7 @@ def prediction(neural_net, test_input_cube, choices, initial_state):
     ii = 0
     # Approach based on Lui & Wolf (https://arxiv.org/abs/1903.05206)
     while time < T_max:
+
         state, derivative_state = solver.step(initial_state, dt)
         estimated_variables.append(state)
         initial_state = state
@@ -77,11 +78,11 @@ if __name__ == "__main__":
                   'layers_cells_list': [input_dim, 50, 50, 50, output_dim],
                   'dropouts_rates_list': [0, 0, 0],
                   'learning_rate': 1e-05,
-                  'l2_reg': 1e-06,
+                  'l2_reg': 1e-04,
                   'activation_function': 'elu',
                   'loss_function': 'mse',
                   'optimizer': 'adam',
-                  'n_epochs': 20000,
+                  'n_epochs': 2000,
                   'outputpath': data_path,
                   'model_name': model_name,
                   'input_dim': input_dim,
@@ -103,11 +104,22 @@ if __name__ == "__main__":
               }
 
     errors = list()
+    tests = dict()
+
     for ss in range(number_of_tests):
 
         neural_net.fit(input_cube, output_cube)
+
+        weights = neural_net.get_weights()
+        biases = neural_net.get_biases()
+
         error = prediction(neural_net, test_input_cube, choices, initial_state)
         errors.append(error)
+
+        test_string = 'test_{}'.format(ss)
+        # This is an inefficient way for storing the data
+        # and must be replaced by a better strategy
+        tests[test_string] = {'error': error, 'biases': biases, 'weights': weights}
 
     errors = np.array(errors)
 
