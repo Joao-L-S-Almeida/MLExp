@@ -179,6 +179,18 @@ class DenseNetwork:
 
         self.output_data_expr = self.network(self.input_data_ph, self.weights, self.biases)
 
+    def get_weights(self, layer_index):
+
+        weights = self.sess.run(self.weights[layer_index])
+
+        return weights
+
+    def get_biases(self, layer_index):
+
+        biases = self.sess.run(self.biases[layer_index])
+
+        return biases
+
     def predict(self, input_cube):
 
         map_dict = {self.input_data_ph: input_cube}
