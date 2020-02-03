@@ -5,7 +5,7 @@ import numpy as np
 from MLExp.tests.problem_classes import LorenzSystem
 from MLExp.numerics.timeint import RK4
 import matplotlib.pyplot as plt
-
+from fraction import Fraction
 from argparse import ArgumentParser
 
 
@@ -18,6 +18,9 @@ if __name__ == "__main__":
     parser.add_argument('--data_path', type=str)
     parser.add_argument('--time', type=float)
     parser.add_argument('--dt', type=float)
+    parser.add_argument('--rho', type=float)
+    parser.add_argument('--sigma', type=float)
+    parser.add_argument('--beta', type=str)
 
     args = parser.parse_args()
 
@@ -27,9 +30,10 @@ if __name__ == "__main__":
 
     initial_state = np.array([1, 0, 0])
 
-    rho = 28
-    beta = 8/3
-    sigma = 10
+    rho = args.rho #28
+    beta = float(Fraction(args.beta)) #8/3
+    sigma = args.sigma #10
+
     problem = LorenzSystem(rho, sigma, beta)
 
     solver = RK4(problem)
