@@ -3,6 +3,8 @@ sys.path.insert(0, ".")
 import numpy as np
 from MLExp.core.tf_applications.neural_net_classes import DenseNetwork
 from MLExp.numerics.timeint import RK4, FunctionWrapper
+from MLExp.auxiliary.special_operations import one_hot_array
+import itertools
 
 from argparse import ArgumentParser
 
@@ -90,7 +92,7 @@ if __name__ == "__main__":
                   }
 
     neural_net = DenseNetwork(test_setup)
-    number_of_tests = 10
+    number_of_tests = 3
 
     initial_state = input_cube[-1, :]
 
@@ -119,9 +121,26 @@ if __name__ == "__main__":
         test_string = 'test_{}'.format(ss)
         # This is an inefficient way for storing the data
         # and must be replaced by a better strategy
-        tests[test_string] = {'error': error, 'biases': biases, 'weights': weights}
 
-    errors = np.array(errors)
+        overall_array = one_hot_array(weights + biases)
+        tests[test_string] = {'error': error, 'coeffs_array': overall_array}
+
+        print("{} executed".format(test_string))
+
+    combinations = itertools.combinations(tests.values(), 2)
+
+    errors_list = list()
+    l2_distances_list = list()
+
+    for combination in combinations:
+
+        one = combination[0]
+        other = combination[1]
+
+        error = np.abs(one['error'] - other['error'])
+        l2_distance = np.linalg.norm(one['coeffs_array'] - other['coeffs_array'], 2)
+        errors_list.append(error)
+        l2_distances_list.append(l2_distance)
 
     print("Model constructed.")
 
