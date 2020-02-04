@@ -5,7 +5,7 @@ import numpy as np
 from MLExp.tests.problem_classes import LorenzSystem
 from MLExp.numerics.timeint import RK4
 import matplotlib.pyplot as plt
-from fraction import Fraction
+from fractions import Fraction
 from argparse import ArgumentParser
 
 
