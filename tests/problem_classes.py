@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import linalg
 
 class NonlinearOscillator:
 
@@ -39,3 +40,36 @@ class LorenzSystem:
 
         return np.array([f, g, h])
 
+    def jacobian(self, state, e, w, dt):
+
+        x = state[0]
+        y = state[1]
+        z = state[2]
+
+        e1 = e[0]
+        e2 = e[1]
+        e3 = e[2]
+
+        D = np.array([
+                        [-self.sigma, self.sigma, 0],
+                        [-z + self.rho,    -1,   -x],
+                        [y,       x,     -self.beta]
+                     ])
+
+        J = np.eye(3) + dt*D
+        w_prev = w
+        w = linalg.orth(J*w_prev)
+
+        de1 = np.log(np.linalg.norm(w[:, 0], 2))
+        de2 = np.log(np.linalg.norm(w[:, 1], 2))
+        de3 = np.log(np.linalg.norm(w[:, 2], 2))
+
+        e1 += de1
+        e2 += de2
+        e3 += de3
+
+        w1 = w[:, 0] / np.linalg.norm(w[:, 0], 2)
+        w2 = w[:, 1] / np.linalg.norm(w[:, 1], 2)
+        w3 = w[:, 2] / np.linalg.norm(w[:, 2], 2)
+
+        return np.array([e1, e2, e3]), np.hstack([w1[:, None], w2[:, None], w3[:, None]])

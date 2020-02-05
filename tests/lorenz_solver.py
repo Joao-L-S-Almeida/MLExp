@@ -28,7 +28,7 @@ if __name__ == "__main__":
     T = args.time
     dt = args.dt
 
-    initial_state = np.array([1, 0, 0])
+    initial_state = np.array([1, 2, 3])
 
     rho = args.rho #28
     beta = float(Fraction(args.beta)) #8/3
@@ -46,9 +46,14 @@ if __name__ == "__main__":
     current_state = initial_state
 
     iter = 0
+    w = np.eye(3)
+    e = np.zeros(3)
+
     for tt in range(time.shape[0]):
 
         variables_state, derivatives_state = solver.step(current_state, dt)
+        e, w = problem.jacobian(variables_state, e, w, dt)
+
         variables_timesteps.append(variables_state[:, None])
         derivatives_timesteps.append(derivatives_state[:, None])
         current_state = variables_state
