@@ -73,3 +73,25 @@ class LorenzSystem:
         w3 = w[:, 2] / np.linalg.norm(w[:, 2], 2)
 
         return np.array([e1, e2, e3]), np.hstack([w1[:, None], w2[:, None], w3[:, None]])
+
+class VanDerPolSystem:
+
+    def __init__(self, mu, A, omega):
+
+        self.mu = mu
+        self.A = A
+        self.omega = omega
+
+    def __call__(self, state):
+
+        x = state[0]
+        y = state[1]
+        t = state[2]
+
+        f = y
+        g = self.mu*(1 - x**2)*y - x - self.A*np.sin(self.omega*t)
+
+        return np.array([f, g, 1])
+
+
+
