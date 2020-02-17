@@ -57,8 +57,12 @@ if __name__ == "__main__":
         sys.stdout.flush()
         iter += 1
 
-    variables_matrix = np.hstack(variables_timesteps)
-    derivatives_matrix = np.hstack(derivatives_timesteps)
+    variables_matrix = np.hstack(variables_timesteps)[:-1, :]
+    derivatives_matrix = np.hstack(derivatives_timesteps)[:-1, :]
+
+    # Just for experimentation
+    variables_matrix = variables_matrix# / np.abs(variables_matrix.max(1)[:, None])
+    derivatives_matrix = derivatives_matrix# / np.abs(variables_matrix.max(1)[:, None])
 
     plt.plot(time, variables_matrix[0, :], label="x")
     plt.plot(time, variables_matrix[1, :], label="y")
