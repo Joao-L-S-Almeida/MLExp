@@ -88,6 +88,12 @@ for ss, vti_file in enumerate(data_directories):
 
     #ds[ss, :, :] = variables_array
 
+for partition in range(number_of_partitions):
+    list_of_arrays = solution_dict[partition]
+    solution_dict[partition] = np.stack(list_of_arrays, 0)
+
+# TODO Now we need to reconstruct the original domain
+
 # Spatially connecting the lattice points
 h5f.close()  
 
