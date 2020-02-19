@@ -1,8 +1,6 @@
 import numpy as np 
 import os
-from argparse import ArgumentParser 
-import vtk
-from vtk.util.numpy_support import vtk_to_numpy
+from argparse import ArgumentParser
 import tables 
 import glob
 import pyvista
@@ -65,7 +63,7 @@ for ss, vti_file in enumerate(data_directories):
     # Recovering important information from the file name
     iteration, partition = extract_data_from_name(vti_file)
 
-    points_dict[partition] = {'points': points.reshape(data_dimensions+(points.shape[-1],))}
+    points_dict[partition] = points.reshape(data_dimensions+(points.shape[-1],))
 
     print("File {} read".format(vti_file))
 
@@ -76,6 +74,8 @@ for ss, vti_file in enumerate(data_directories):
     variables_list = list() 
 
     variables_dict = data.point_arrays
+
+    spacing = data.GetSpacing()
 
     for name in variables:
         
@@ -92,13 +92,69 @@ for ss, vti_file in enumerate(data_directories):
     variables_array = np.dstack(variables_list)
     solution_dict[partition].append(variables_array)
 
+
     #ds[ss, :, :] = variables_array
 
+x_list = list()
+y_list = list()
+
 for partition in range(number_of_partitions):
+
     list_of_arrays = solution_dict[partition]
     solution_dict[partition] = np.stack(list_of_arrays, 0)
 
+    points_array = points_dict[partition]
+
+    number_of_snapshots = solution_dict[partition].shape[0]
+
+    x_max = points_array[:, :, 0].max()
+    x_min = points_array[:, :, 0].min()
+
+    y_max = points_array[:, :, 1].max()
+    y_min = points_array[:, :, 1].min()
+
+    x_list.append(x_max)
+    x_list.append(x_min)
+
+    y_list.append(y_max)
+    y_list.append(y_min)
+
+    y_list.append(y_max)
+
+x_max = np.array(x_list).max()
+x_min = np.array(x_list).min()
+
+y_max = np.array(y_list).max()
+y_min = np.array(y_list).min()
+
+x_dim = int((x_max - x_min)/spacing[0])+1
+y_dim = int((y_max - y_min)/spacing[1])+1
+
 # TODO Now we need to reconstruct the original domain
+# This allocation method should be replaced by a more convenient one
+# such as HDF5 allocation in disk
+global_x_array = np.linspace(x_min, x_max, x_dim)
+global_y_array = np.linspace(y_min, y_max, y_dim)
+global_z_array = np.zeros(1)
+
+global_points_array = np.meshgrid(global_x_array, global_y_array, global_z_array)
+global_points_array = np.dstack(global_points_array)
+
+global_indices_array = ((global_points_array - np.tile(np.array([x_min, y_min, 0]), (y_dim, x_dim, 1)))\
+                        /np.array(spacing)).astype(int)
+
+global_solution_array = np.zeros((number_of_snapshots, y_dim, x_dim, n_variables))
+
+
+for partition in range(number_of_partitions):
+
+    points_array = points_dict[partition]
+    local_x_dim, local_y_dim = points_array.shape[:-1]
+    indices_array = ((points_array - np.tile(np.array([x_min, y_min, 0]), (local_x_dim, local_y_dim, 1)))\
+                        /np.array(spacing)).astype(int)
+    solution_array = solution_dict[partition]
+
+    print("Connecting the multiple partitions.")
 
 # Spatially connecting the lattice points
 h5f.close()  
