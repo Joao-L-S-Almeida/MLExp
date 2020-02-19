@@ -16,6 +16,18 @@ def name_index(input_string):
    
     return index
 
+def extract_data_from_name(vti_file):
+
+    sub_names = vti_file.split("\\")
+    file_name = sub_names[-1]
+    file_indices = file_name.split('_')[-1]
+    file_indices = file_indices[:-4]
+    coordinates = file_indices.split('i')[1:]
+    iteration = int(coordinates[0][1:])
+    partition = int(coordinates[1][1:])
+
+    return iteration, partition
+
 parser = ArgumentParser(description='Argument parsers')
 parser.add_argument('--path', type=str)
 parser.add_argument('--case', type=str)
@@ -51,13 +63,7 @@ for ss, vti_file in enumerate(data_directories):
     data_dimensions = data.GetDimensions()[:-1]
 
     # Recovering important information from the file name
-    sub_names = vti_file.split("\\")
-    file_name = sub_names[-1]
-    file_indices = file_name.split('_')[-1]
-    file_indices = file_indices[:-4]
-    coordinates = file_indices.split('i')[1:]
-    iteration = int(coordinates[0][1:])
-    partition = int(coordinates[1][1:])
+    iteration, partition = extract_data_from_name(vti_file)
 
     points_dict[partition] = {'points': points.reshape(data_dimensions+(points.shape[-1],))}
 
