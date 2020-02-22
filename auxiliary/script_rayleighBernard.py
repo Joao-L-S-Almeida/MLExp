@@ -183,7 +183,13 @@ for partition in range(number_of_partitions):
 
     print("Connecting the multiple partitions.")
 
-# Spatially connecting the lattice points
-h5f.close()  
+
+# The Numpy format is used for small data with testing purposes
+# For big data we consider to dump the data directly to HDF5 format
+# still during the conversion
+global_solution_array = global_solution_array.transpose(0, 3, 1, 2)
+np.save(path + "rayleighBernard.np", global_solution_array)
+
+h5f.close()
 
 print("Input arguments read")
