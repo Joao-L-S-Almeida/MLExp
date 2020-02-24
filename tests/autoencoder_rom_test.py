@@ -25,9 +25,9 @@ if __name__ == "__main__":
     testing_data = data[batch_size:, :, :, :]
 
     # The number of channels is equivalent to the number of variables
-    n_channels = data.shape[1]
-    n_rows = data.shape[2]
-    n_columns = data.shape[3]
+    n_channels = data.shape[3]
+    n_rows = data.shape[1]
+    n_columns = data.shape[2]
 
     layers_configuration = {
                             'encoder': {

@@ -18,7 +18,7 @@ class AutoEncoder:
 
     def construct(self, n_channels, n_rows, n_columns):
 
-        input_tensor = Input(shape=(n_channels, n_rows, n_columns))
+        input_tensor = Input(shape=(n_rows, n_columns, n_channels))
 
         # Encoder
         encoder_layers = self.layers_configuration.get('encoder')
@@ -52,7 +52,7 @@ class AutoEncoder:
 
     def fit(self, input_data, output_data, model=None):
 
-        n_channels, n_rows, n_columns = input_data.shape[1:]
+        n_rows, n_columns, n_channels = input_data.shape[1:]
 
         if not model:
             model = self.construct(n_channels, n_rows, n_columns)
