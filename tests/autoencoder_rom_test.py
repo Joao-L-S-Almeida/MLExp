@@ -1,5 +1,6 @@
 import numpy as np
 from argparse import ArgumentParser
+from core.rom import AutoEncoder
 
 if __name__ == "__main__":
 
@@ -23,4 +24,38 @@ if __name__ == "__main__":
     training_data = data[:batch_size, :, :, :]
     testing_data = data[batch_size:, :, :, :]
 
-    
+    # The number of channels is equivalent to the number of variables
+    n_channels = data.shape[1]
+    n_rows = data.shape[2]
+    n_columns = data.shape[3]
+
+    layers_configuration = {
+                            'encoder': {
+                                        'conv1': {
+                                                    'filters': 2*n_channels,
+                                                    'kernel_size': (2, 2),
+                                                    'strides': (1, 1),
+                                                    'padding': "valid",
+                                                    'activation': "relu"
+                                                },
+                                        'conv2': {
+                                                    'filters': 2 * n_channels,
+                                                    'kernel_size': (2, 2),
+                                                    'strides': (1, 1),
+                                                    'padding': "valid",
+                                                    'activation': 'relu'
+                                                }
+                                        }
+                            }
+
+    setup = {
+                'learning_rate': 1e-5,
+                'optimizer': 'adam',
+                'loss_function': 'mse',
+                'l2_reg': 1e-05,
+                'n_epochs' : 1000
+            }
+
+    autoencoder_rom = AutoEncoder(layers_configuration, setup)
+
+    autoencoder_rom.fit(training_data, training_data)
