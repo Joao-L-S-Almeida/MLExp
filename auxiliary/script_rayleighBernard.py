@@ -188,7 +188,7 @@ for partition in range(number_of_partitions):
 # For big data we consider to dump the data directly to HDF5 format
 # still during the conversion
 global_solution_array = global_solution_array.transpose(0, 3, 1, 2)
-np.save(path + "rayleighBernard.np", global_solution_array)
+np.save(path + "rayleighBernard.npy", global_solution_array)
 
 h5f.close()
 
