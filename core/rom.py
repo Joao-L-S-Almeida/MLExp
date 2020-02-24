@@ -1,5 +1,5 @@
 import numpy as np
-from keras.layers import Input, Dense, Dropout, Conv2D
+from keras.layers import Input, Dense, Dropout, Conv2D, Conv2DTranspose, Flatten
 from keras.models import Model
 from keras.models import load_model
 from keras import regularizers
@@ -22,8 +22,9 @@ class AutoEncoder:
 
         # Encoder
         encoder_layers = self.layers_configuration.get('encoder')
+        decoder_layers = self.layers_configuration.get('decoder')
 
-        input_layer = input_tensor
+        layer_input = input_tensor
         for layer_key, layer in encoder_layers.items():
 
             filters_layer = layer.get('filters')
@@ -38,10 +39,31 @@ class AutoEncoder:
                                     padding=padding_layer,
                                     activation=activation_layer)
 
-            layer_output = layer_op(input_layer)
+            layer_output = layer_op(layer_input)
+            layer_input = layer_output
+
+        layer_output = Flatten()(layer_output)
+        output_tensor = layer_output
+
+        for layer_key, layer in decoder_layers.items():
+
+            filters_layer = layer.get('filters')
+            kernel_size_layer = layer.get('kernel_size')
+            strides_layer = layer.get('strides')
+            padding_layer = layer.get('padding')
+            activation_layer = layer.get('activation')
+
+            layer_op = Conv2DTranspose(filters_layer,
+                                    kernel_size_layer,
+                                    strides=strides_layer,
+                                    padding=padding_layer,
+                                    activation=activation_layer)
+
+            layer_output = layer_op(layer_input)
             layer_input = layer_output
 
         output_tensor = layer_output
+
         print("Encoder constructed")
 
         model = Model(inputs=input_tensor, outputs=output_tensor)
