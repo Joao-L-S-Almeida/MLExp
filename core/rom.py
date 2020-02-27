@@ -1,5 +1,5 @@
 import numpy as np
-from keras.layers import Input, Dense, Dropout, Conv2D, Conv2DTranspose, Flatten
+from keras.layers import Input, Dense, Dropout, Conv2D, Conv2DTranspose, Flatten, Reshape
 from keras.models import Model
 from keras.models import load_model
 from keras import regularizers
@@ -20,7 +20,7 @@ class AutoEncoder:
 
         input_tensor = Input(shape=(n_rows, n_columns, n_channels))
 
-        # Encoder
+        # Beginning of the Encoder transformation
         encoder_layers = self.layers_configuration.get('encoder')
         decoder_layers = self.layers_configuration.get('decoder')
 
@@ -33,17 +33,27 @@ class AutoEncoder:
             padding_layer = layer.get('padding')
             activation_layer = layer.get('activation')
 
-            layer_op = Conv2D(filters_layer,
+            conv_op = Conv2D(filters_layer,
                                     kernel_size_layer,
                                     strides=strides_layer,
                                     padding=padding_layer,
                                     activation=activation_layer)
 
-            layer_output = layer_op(layer_input)
+            layer_output = conv_op(layer_input)
             layer_input = layer_output
 
-        layer_output = Flatten()(layer_output)
-        output_tensor = layer_output
+        # "Bottleneck" operations. Here should be the central dense layers operations
+
+        output_dims = layer_output.shape
+        total_dimension = output_dims[1].value*output_dims[2].value*output_dims[3].value
+        layer_output = Reshape([total_dimension])(layer_output)
+        # Here the dense operations for dimensionality reduction must be performed
+        output_dims = layer_output.shape
+        layer_output = Reshape([1, 1, output_dims[1].value])(layer_output)
+        encoder_output_tensor = layer_output
+        # End of the encoder transformation
+
+        layer_input = encoder_output_tensor
 
         for layer_key, layer in decoder_layers.items():
 

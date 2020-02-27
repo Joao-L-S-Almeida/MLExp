@@ -187,7 +187,7 @@ for partition in range(number_of_partitions):
 # The Numpy format is used for small data with testing purposes
 # For big data we consider to dump the data directly to HDF5 format
 # still during the conversion
-global_solution_array = global_solution_array.transpose(0, 3, 1, 2)
+#global_solution_array = global_solution_array.transpose(0, 3, 1, 2)
 np.save(path + "rayleighBernard.npy", global_solution_array)
 
 h5f.close()
