@@ -52,30 +52,30 @@ if __name__ == "__main__":
                                             'padding': "valid",
                                             'activation': 'relu'
                                         }
-                            },
-                            'decoder': {
-                                'conv1': {
-                                    'filters': 8 * n_channels,
-                                    'kernel_size': (10, 20),
-                                    'strides': (5, 5),
-                                    'padding': "valid",
-                                    'activation': "relu"
                                 },
-                                'conv2': {
-                                    'filters': 4 * n_channels,
-                                    'kernel_size': (10, 5),
-                                    'strides': (3, 5),
-                                    'padding': "valid",
-                                    'activation': 'relu'
-                                },
-                                'conv3': {
-                                    'filters': n_channels,
-                                    'kernel_size': (3, 3),
-                                    'strides': (3, 4),
-                                    'padding': "valid",
-                                    'activation': 'relu'
+                                'decoder': {
+                                    'conv1': {
+                                        'filters': 8 * n_channels,
+                                        'kernel_size': (5, 5),
+                                        'strides': (15, 16),
+                                        'padding': "valid",
+                                        'activation': "relu"
+                                    },
+                                    'conv2': {
+                                        'filters': 4 * n_channels,
+                                        'kernel_size': (7, 7),
+                                        'strides': (7, 13),
+                                        'padding': "same",
+                                        'activation': 'relu'
+                                    },
+                                    'conv3': {
+                                        'filters': n_channels,
+                                        'kernel_size': (2, 2),
+                                        'strides': (1, 1),
+                                        'padding': "same",
+                                        'activation': 'relu'
+                                    }
                                 }
-                            }
                             }
 
     setup = {
