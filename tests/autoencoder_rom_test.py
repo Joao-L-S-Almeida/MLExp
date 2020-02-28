@@ -1,6 +1,7 @@
 import numpy as np
 from argparse import ArgumentParser
 from core.rom import AutoEncoder
+from collections import OrderedDict
 
 if __name__ == "__main__":
 
@@ -29,54 +30,90 @@ if __name__ == "__main__":
     n_rows = data.shape[1]
     n_columns = data.shape[2]
 
-    layers_configuration = {
-                            'encoder': {
-                                        'conv1': {
-                                                    'filters': 2*n_channels,
-                                                    'kernel_size': (10, 20),
-                                                    'strides': (5, 5),
-                                                    'padding': "valid",
-                                                    'activation': "relu"
-                                                },
-                                        'conv2': {
-                                                    'filters': 4 * n_channels,
-                                                    'kernel_size': (5, 10),
-                                                    'strides': (3, 5),
-                                                    'padding': "valid",
-                                                    'activation': 'relu'
-                                                },
-                                        'conv3': {
-                                            'filters': 8 * n_channels,
-                                            'kernel_size': (3, 3),
-                                            'strides': (3, 4),
-                                            'padding': "valid",
-                                            'activation': 'relu'
-                                        }
-                                },
-                                'decoder': {
-                                    'conv1': {
-                                        'filters': 8 * n_channels,
-                                        'kernel_size': (5, 5),
-                                        'strides': (15, 16),
-                                        'padding': "valid",
-                                        'activation': "relu"
-                                    },
-                                    'conv2': {
-                                        'filters': 4 * n_channels,
-                                        'kernel_size': (7, 7),
-                                        'strides': (7, 13),
-                                        'padding': "same",
-                                        'activation': 'relu'
-                                    },
-                                    'conv3': {
-                                        'filters': n_channels,
-                                        'kernel_size': (2, 2),
-                                        'strides': (1, 1),
-                                        'padding': "same",
-                                        'activation': 'relu'
-                                    }
-                                }
-                            }
+    encoder_keys = ['conv1', 'conv2', 'conv3']
+    decoder_keys = ['dconv1', 'dconv2', 'dconv3']
+    
+    encoder_dict = OrderedDict()
+    decoder_dict = OrderedDict()
+    
+    conv1 = {
+                        'filters': 2*n_channels,
+                        'kernel_size': (5, 10),
+                        'strides': (5, 5),
+                        'padding': "valid",
+                        'activation': "relu",
+                        'pool_size': None,
+                        'pool_strides': None,
+                        'pool_padding': None
+            }
+
+    conv2 = {
+                        'filters': 4 * n_channels,
+                        'kernel_size': (5, 10),
+                        'strides': (3, 5),
+                        'padding': "valid",
+                        'activation': 'relu',
+                        'pool_size': None,
+                        'pool_strides': None,
+                        'pool_padding': None
+            }
+
+    conv3 = {
+
+                        'filters': 8 * n_channels,
+                        'kernel_size': (3, 3),
+                        'strides': (3, 4),
+                        'padding': "valid",
+                        'activation': 'relu',
+                        'pool_size': None,
+                        'pool_strides': None,
+                        'pool_padding': None
+            }
+
+    dconv1 = {
+                        'filters': 8 * n_channels,
+                        'kernel_size': (5, 5),
+                        'strides': (15, 16),
+                        'padding': "valid",
+                        'activation': "relu",
+                        'pool_size': None,
+                        'pool_strides': None,
+                        'pool_padding': None
+              }
+
+    dconv2 =  {
+                        'filters': 4 * n_channels,
+                        'kernel_size': (7, 7),
+                        'strides': (7, 13),
+                        'padding': "same",
+                        'activation': 'relu',
+                        'pool_size': None,
+                        'pool_strides': None,
+                        'pool_padding': None
+              }
+
+    dconv3 = {
+                        'filters': n_channels,
+                        'kernel_size': (2, 2),
+                        'strides': (1, 1),
+                        'padding': "same",
+                        'activation': 'relu',
+                        'pool_size': None,
+                        'pool_strides': None,
+                        'pool_padding': None
+              }
+
+
+    encoder_list = [conv1, conv2, conv3]
+    decoder_list = [dconv1, dconv2, dconv3]
+
+    for key, item in zip(encoder_keys, encoder_list):
+        encoder_dict[key] = item
+
+    for key, item in zip(decoder_keys, decoder_list):
+        decoder_dict[key] = item
+
+    layers_configuration = {'encoder': encoder_dict, 'decoder': decoder_dict}
 
     setup = {
                 'learning_rate': 1e-5,
