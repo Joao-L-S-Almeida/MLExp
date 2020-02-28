@@ -1,5 +1,9 @@
 import numpy as np
-from keras.layers import Input, Dense, Dropout, Conv2D, Conv2DTranspose, Flatten, Reshape
+from keras.layers import (
+    Input, Dense, Dropout,
+    Conv2D, Conv2DTranspose, Flatten,
+    Reshape, MaxPooling2D
+ )
 from keras.models import Model
 from keras.models import load_model
 from keras import regularizers
@@ -32,6 +36,9 @@ class AutoEncoder:
             strides_layer = layer.get('strides')
             padding_layer = layer.get('padding')
             activation_layer = layer.get('activation')
+            pool_size_layer = layer.get('pool_size')
+            pool_strides_layer = layer.get('pool_strides')
+            pool_padding_layer = layer.get('pool_padding')
 
             conv_op = Conv2D(filters_layer,
                                     kernel_size_layer,
@@ -39,7 +46,17 @@ class AutoEncoder:
                                     padding=padding_layer,
                                     activation=activation_layer)
 
-            layer_output = conv_op(layer_input)
+            layer_output_conv = conv_op(layer_input)
+
+            if pool_size_layer:
+                maxpool_op = MaxPooling2D(pool_size=pool_size_layer,
+                                          strides=pool_strides_layer,
+                                          padding=pool_padding_layer)
+
+                layer_output = maxpool_op(layer_output_conv)
+            else:
+                layer_output = layer_output_conv
+
             layer_input = layer_output
 
         # "Bottleneck" operations. Here should be the central dense layers operations
@@ -54,6 +71,7 @@ class AutoEncoder:
         # End of the encoder transformation
 
         layer_input = encoder_output_tensor
+        input_shape = [shape.value for shape in layer_input.shape]
 
         for layer_key, layer in decoder_layers.items():
 
@@ -62,15 +80,27 @@ class AutoEncoder:
             strides_layer = layer.get('strides')
             padding_layer = layer.get('padding')
             activation_layer = layer.get('activation')
+            pool_size_layer = layer.get('pool_size')
+            pool_strides_layer = layer.get('pool_strides')
+            pool_padding_layer = layer.get('pool_padding')
 
-            layer_op = Conv2DTranspose(filters_layer,
+            conv_op = Conv2DTranspose(filters_layer,
                                     kernel_size_layer,
                                     strides=strides_layer,
                                     padding=padding_layer,
                                     activation=activation_layer)
 
-            layer_output = layer_op(layer_input)
-            layer_input = layer_output
+            layer_output_conv = conv_op(layer_input)
+
+            if pool_size_layer:
+                maxpool_op = MaxPooling2D(pool_size=pool_size_layer,
+                                          strides=pool_strides_layer,
+                                          padding=pool_padding_layer)
+
+                layer_output = maxpool_op(layer_output_conv)
+
+            else:
+                layer_output = layer_output_conv
 
         output_tensor = layer_output
 
