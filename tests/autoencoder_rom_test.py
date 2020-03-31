@@ -72,8 +72,8 @@ if __name__ == "__main__":
 
     dconv1 = {
                         'filters': 8 * n_channels,
-                        'kernel_size': (5, 5),
-                        'strides': (15, 16),
+                        'kernel_size': (2, 2),
+                        'strides': (7, 7),
                         'padding': "valid",
                         'activation': "relu",
                         'pool_size': None,
@@ -83,13 +83,13 @@ if __name__ == "__main__":
 
     dconv2 =  {
                         'filters': 4 * n_channels,
-                        'kernel_size': (7, 7),
-                        'strides': (7, 13),
+                        'kernel_size': (2, 2),
+                        'strides': (6, 6),
                         'padding': "same",
                         'activation': 'relu',
-                        'pool_size': None,
-                        'pool_strides': None,
-                        'pool_padding': None
+                        'pool_size': (2, 2),
+                        'pool_strides': (2, 2),
+                        'pool_padding': "same"
               }
 
     dconv3 = {
@@ -98,9 +98,9 @@ if __name__ == "__main__":
                         'strides': (1, 1),
                         'padding': "same",
                         'activation': 'relu',
-                        'pool_size': None,
-                        'pool_strides': None,
-                        'pool_padding': None
+                        'pool_size': (2, 2),
+                        'pool_strides': (2, 2),
+                        'pool_padding': "same"
               }
 
 
