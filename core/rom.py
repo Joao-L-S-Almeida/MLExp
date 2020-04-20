@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.decomposition import PCA
 from keras.layers import (
     Input, Dense, Dropout,
     Conv2D, Conv2DTranspose, Flatten,
@@ -7,6 +8,28 @@ from keras.layers import (
 from keras.models import Model
 from keras.models import load_model
 from keras import regularizers
+
+class POD:
+
+    def __init__(self, config):
+
+        self.pca = PCA(**config)
+
+    def fit(self, data=None):
+
+        self.pca.fit(data)
+        total_modal_energy = self.pca.explained_variance_ratio_.sum()
+        print("Modal energy preserved: {}".format(total_modal_energy))
+
+        self.modes = self.pca.components_
+
+    def project(self, data=None):
+
+        return data.dot(self.modes.T)
+
+    def reconstruct(self, data=None):
+
+        return data.dot(self.modes)
 
 class AutoEncoder:
 
