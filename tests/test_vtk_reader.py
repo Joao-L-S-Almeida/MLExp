@@ -4,7 +4,7 @@ sys.path.insert(0, '.')
 from argparse import ArgumentParser
 import glob
 import imageio
-import platform
+import platform 
 
 from MLExp.io.input_reader import VTKReader
 

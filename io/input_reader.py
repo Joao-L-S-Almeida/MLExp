@@ -47,6 +47,23 @@ class VTKReader:
         data = pyvista.read(vti_file)
         return data.point_arrays.keys()
 
+    def _array_dimensions_corrector(self, ref_dim, actual_array):
+
+        actual_dim = actual_array.shape
+
+        if ref_dim == actual_dim:
+            print("Dimensional correction was not necessary here.")
+            return actual_array
+
+        elif np.prod(ref_dim) < np.prod(actual_dim):
+            print("Using dimensional contraction.")
+            limited_actual_dim = tuple([slice(dim) for dim in ref_dim])
+            return actual_array[limited_actual_dim]
+
+        else:
+            raise Exception("Impossible to adjust this dimensions"
+                            "using the currently implemented methods.")
+
     def _discover_number_of_partitions_and_iterations(self, data_directories=None):
 
         partitions_list = list()
@@ -184,7 +201,8 @@ class VTKReader:
 
             it_index = self.iterations_dict[iteration]
 
-            global_solution_array[it_index, i_min:i_max + 1, j_min:j_max + 1, :] = solution_array
+            ref_dim = (i_max - i_min  + 1, j_max - j_min  + 1, solution_array.shape[-1])
+            global_solution_array[it_index, i_min:i_max + 1, j_min:j_max + 1, :] = self._array_dimensions_corrector(ref_dim, solution_array)
 
 
         self.global_solution_array = global_solution_array[:,::-1, :, :]

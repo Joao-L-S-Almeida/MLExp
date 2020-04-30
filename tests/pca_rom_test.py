@@ -2,6 +2,8 @@ import sys
 sys.path.insert(0, '.')
 
 import numpy as np
+import matplotlib.pyplot as plt
+
 from argparse import ArgumentParser
 from core.rom import POD
 from numerics.timederivation import CollocationDerivative
@@ -44,16 +46,20 @@ if __name__ == "__main__":
 
     X, T, Y = np.meshgrid(x, t, y)
 
+    dt = (t_max - t_min) / N_t
+
     if problem == "time_interact":
         U = np.exp(-lambd*Y*T)*np.cos(omega_t*T*X)
     elif problem == "time_isolated":
         U = (np.exp(-lambd * T)*(T**2))\
             * np.cos(omega_t * Y * X**3)*np.cos(omega_t * Y**2 * X)
+    elif problem == "time_oscillating":
+        U = (np.cos(omega_t*T) + np.cos(omega_t*T/2) + np.cos(omega_t*T/4)) \
+            * np.cos(omega_t * Y * X ** 3) * np.cos(omega_t * Y ** 2 * X)
     else:
         raise Exception("Problem no implemented.")
 
-    dt = (t_max - t_min)/N_t
-
+    # Preparing data to be used in the ROM
     shapes = U.shape
     collapsible_shapes = shapes[1:]
     immutable_shape = shapes[0]
@@ -66,14 +72,26 @@ if __name__ == "__main__":
     batch_size = data.shape[0]
 
     train_batch_size = int(batch_size/2)
+
     T_max = (t_max - t_min)/2
 
+    # Separating training and testing data
     train_data = data[:train_batch_size, :]
     test_data = data[train_batch_size:, :]
 
+    # Instantiating the Proper Orthogonal Decomposition class
     config = {'n_components': 5}
-
     rom = POD(config=config)
+
+    # Subtracting the mean component
+    train_data_mean = train_data.mean(0)[None, :]
+    global_norm = np.linalg.norm(train_data, 2)
+    mean_norm = np.linalg.norm(train_data_mean, 2)
+
+    train_data = train_data - train_data_mean
+    test_data = test_data - train_data_mean
+
+    print("Relative contribution of the mean component: {}".format(mean_norm/global_norm))
 
     rom.fit(data=train_data)
 
@@ -126,7 +144,7 @@ if __name__ == "__main__":
     error = np.linalg.norm(test_derivative_reduced_data
                            - estimated_derivative_data_reduced, 2)
 
-    relative_error = error/ref_value
+    relative_error = error/np.linalg.norm(test_derivative_reduced_data, 2)
 
     print("Relative derivative error: {} %".format(100*relative_error))
 
@@ -161,9 +179,25 @@ if __name__ == "__main__":
 
     estimated_test_data = rom.reconstruct(data=estimated_variables)
 
-    error = np.linalg.norm(test_data
-                           - estimated_test_data, 2)
+    error = np.linalg.norm(test_data - estimated_test_data, 2)
 
     print("Extrapolation error : {} %".format(100*error/ref_value))
 
     print("Extrapolation concluded.")
+
+    # Post-processing
+    final_shape = collapsible_shapes
+
+    estimated_slice = estimated_test_data[-1, :].reshape(final_shape)
+    exact_slice = test_data[-1, :].reshape(final_shape)
+
+    plt.imshow(estimated_slice)
+    plt.colorbar()
+    plt.show()
+    plt.savefig(data_path + "estimated_solution.png")
+
+    plt.imshow(exact_slice)
+    plt.colorbar()
+    plt.show()
+    plt.savefig(data_path + "exact_solution.png")
+
