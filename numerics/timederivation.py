@@ -7,13 +7,20 @@ class CollocationDerivative:
 
         self.dt = timestep
 
-    def solve(self, data=None):
+    def solve(self, data=None, x=None):
 
         # data must be a matrix with shape (n_timsteps, n_variables)
         n_variables = data.shape[1]
         n_timesteps = data.shape[0]
 
-        times = np.arange(0, n_timesteps, 1)*self.dt
+        if self.dt:
+            times = np.arange(0, n_timesteps, 1)*self.dt
+
+        elif (not self.dt) and isinstance(x, np.ndarray):
+            times = x
+
+        else:
+            raise Exception('There is no axis to perform differentiation.')
 
         data_derivatives_list = list()
         for var in range(n_variables):

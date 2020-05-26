@@ -5,10 +5,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from argparse import ArgumentParser
-from core.rom import POD
-from numerics.timederivation import CollocationDerivative
-from core.tf_applications.neural_net_classes import DenseNetwork
-from numerics.timeint import RK4, FunctionWrapper
+from MLExp.core.rom import POD                                                                                                     
+from MLExp.numerics.timederivation import CollocationDerivative
+from MLExp.core.tf_applications.neural_net_classes import DenseNetwork
+from MLExp.numerics.timeint import RK4, FunctionWrapper
 
 if __name__ == "__main__":
 
@@ -105,10 +105,11 @@ if __name__ == "__main__":
 
     test_reduced_data = rom.project(data=test_data)
 
-    derivative_op = CollocationDerivative(timestep=dt)
+    derivative_op = CollocationDerivative()
 
-    derivative_reduced_data = derivative_op.solve(data=reduced_data)
-    test_derivative_reduced_data = derivative_op.solve(data=test_reduced_data)
+    train_times = t[:train_batch_size]
+    derivative_reduced_data = derivative_op.solve(data=reduced_data, x=train_times)
+    test_derivative_reduced_data = derivative_op.solve(data=test_reduced_data, x=train_times)
 
     input_data = reduced_data
     output_data = derivative_reduced_data

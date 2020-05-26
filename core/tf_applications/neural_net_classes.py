@@ -21,10 +21,20 @@ class DenseNetwork:
         self.input_dim = setup['input_dim']
         self.output_dim = setup['output_dim']
 
+    def _get_activation_function(self, act_func_str):
+
+        if act_func_str in tf.nn.__all__:
+            return getattr(tf.nn, act_func_str)
+        else:
+            raise Exception("The loss function {} is not"
+                            " available in tf.nn".format(act_func_str))
+
     def construct(self, input_dim, output_dim):
 
         self.sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True,
                                                      log_device_placement=False))
+
+        self.activation_function_op = self._get_activation_function(self.activation_function)
 
         self.input_data_ph = tf.placeholder(tf.float32, shape=[None, input_dim])
         self.output_data_ph = tf.placeholder(tf.float32, shape=[None, output_dim])
@@ -93,7 +103,7 @@ class DenseNetwork:
 
             W = weights[ll]
             b = biases[ll]
-            H = tf.nn.elu(tf.add(tf.matmul(H, W), b))
+            H = self.activation_function_op(tf.add(tf.matmul(H, W), b))
 
         W = weights[-1]
         b = biases[-1]
@@ -103,7 +113,8 @@ class DenseNetwork:
 
     def callback(self, loss):
 
-        print('Loss: %.3e' % loss)
+        sys.stdout.write('\rLoss: %.3e' % loss)
+        sys.stdout.flush()
 
     def fit(self, input_data, output_data):
 
@@ -121,7 +132,8 @@ class DenseNetwork:
             if it % 10 == 0:
 
                 loss_value = self.sess.run(self.loss, var_map)
-                print('It: %d, Loss: %.3e' % (it, loss_value))
+                sys.stdout.write('\rIt: %d, Loss: %.3e' % (it, loss_value))
+                sys.stdout.flush()
 
         self.optimizer.minimize(self.sess,
                                 feed_dict=var_map,
@@ -172,6 +184,8 @@ class DenseNetwork:
         saver = tf.train.import_meta_graph(metafile)
 
         saver.restore(self.sess, tf.train.latest_checkpoint(self.savepath))
+
+        self.activation_function_op = self._get_activation_function(self.activation_function)
 
         self.weights, self.biases = self.restore_coeffs(self.layers_cells_list)
 
