@@ -123,8 +123,8 @@ if __name__ == "__main__":
         'dropouts_rates_list': [0, 0, 0, 0, 0],
         'learning_rate': 1e-05,
         'l2_reg': 1e-05,  # 1e-05,
-        'activation_function': 'elu',
-        'loss_function': 'mse',
+        'activation_function': ['elu', 'relu', 'elu', 'relu', 'tanh', 'relu'],
+        'loss_function': 'mse_normed',
         'optimizer': 'adam',
         'n_epochs': 50000,
         'outputpath': data_path,
@@ -167,6 +167,7 @@ if __name__ == "__main__":
     ii = 0
     # Approach based on Lui & Wolf (https://arxiv.org/abs/1903.05206)
     while time < T_max:
+
         state, derivative_state = solver.step(initial_state, dt)
         estimated_variables.append(state)
         initial_state = state

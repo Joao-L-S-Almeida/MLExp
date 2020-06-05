@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-import os
+import os, sys
 from MLExp.core.losses import loss_switcher
 
 class DenseNetwork:
@@ -21,6 +21,13 @@ class DenseNetwork:
         self.input_dim = setup['input_dim']
         self.output_dim = setup['output_dim']
 
+        if isinstance(self.activation_function, str):
+            self.activations_list = [self.activation_function]*len(self.layers_cells_list)
+        elif isinstance(self.activation_function, list):
+            self.activations_list = self.activation_function
+        else:
+            raise Exception('The activation function mut be str or list.')
+
     def _get_activation_function(self, act_func_str):
 
         if act_func_str in tf.nn.__all__:
@@ -34,7 +41,8 @@ class DenseNetwork:
         self.sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True,
                                                      log_device_placement=False))
 
-        self.activation_function_op = self._get_activation_function(self.activation_function)
+        self.activation_function_op = [self._get_activation_function(activation_function)
+                                       for activation_function in self.activations_list]
 
         self.input_data_ph = tf.placeholder(tf.float32, shape=[None, input_dim])
         self.output_data_ph = tf.placeholder(tf.float32, shape=[None, output_dim])
@@ -48,7 +56,8 @@ class DenseNetwork:
 
         self.optimizer = tf.contrib.opt.ScipyOptimizerInterface(self.loss,
                                                                 method='L-BFGS-B',
-                                                                options={'maxiter': 50000,
+                                                                options={'disp': True,
+                                                                         'maxiter': 50000,
                                                                          'maxfun': 50000,
                                                                          'maxcor': 50,
                                                                          'maxls': 50,
@@ -103,7 +112,7 @@ class DenseNetwork:
 
             W = weights[ll]
             b = biases[ll]
-            H = self.activation_function_op(tf.add(tf.matmul(H, W), b))
+            H = self.activation_function_op[ll](tf.add(tf.matmul(H, W), b))
 
         W = weights[-1]
         b = biases[-1]

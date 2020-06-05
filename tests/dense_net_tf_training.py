@@ -46,7 +46,7 @@ if __name__ == "__main__":
                   'learning_rate': 1e-05,
                   'l2_reg': 1e-07, #1e-05,
                   'activation_function': 'elu',
-                  'loss_function': 'mse',
+                  'loss_function': 'mse_normed',
                   'optimizer': 'adam',
                   'n_epochs': 2000,
                   'outputpath': data_path,

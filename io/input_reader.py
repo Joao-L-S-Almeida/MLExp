@@ -51,18 +51,32 @@ class VTKReader:
 
         actual_dim = actual_array.shape
 
-        if ref_dim == actual_dim:
-            print("Dimensional correction was not necessary here.")
-            return actual_array
-
-        elif np.prod(ref_dim) < np.prod(actual_dim):
-            print("Using dimensional contraction.")
-            limited_actual_dim = tuple([slice(dim) for dim in ref_dim])
-            return actual_array[limited_actual_dim]
+        if np.isnan(np.sum(actual_array)):
+            raise Exception("There is NaN in some place.")
 
         else:
-            raise Exception("Impossible to adjust this dimensions"
-                            "using the currently implemented methods.")
+            if ref_dim == actual_dim:
+                print("Dimensional correction was not necessary here.")
+                return actual_array
+
+            elif np.prod(ref_dim) > np.prod(actual_dim):
+
+                void_matrix = 99999*np.ones(ref_dim)
+                limited_actual_dim = tuple([slice(dim) for dim in actual_dim])
+                void_matrix[limited_actual_dim] = actual_array
+                indices = np.where(void_matrix == 99999)
+                void_matrix[indices[0], indices[1], :] = actual_array.mean(axis=(0,1))[:]
+                print("Using dimensional expansion.")
+                return void_matrix
+
+            elif np.prod(ref_dim) < np.prod(actual_dim):
+                print("Using dimensional contraction.")
+                limited_actual_dim = tuple([slice(dim) for dim in ref_dim])
+                return actual_array[limited_actual_dim]
+
+            else:
+                raise Exception("Impossible to adjust this dimensions"
+                                "using the currently implemented methods.")
 
     def _discover_number_of_partitions_and_iterations(self, data_directories=None):
 
