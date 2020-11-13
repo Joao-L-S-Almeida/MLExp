@@ -1,7 +1,7 @@
 h5py==2.10.0
 scipy==1.4.1
 tables==3.6.1
-tensorflow==1.15.0
+tensorflow==2.3.1
 tensorflow-estimator==1.15.1
 numpy==1.18.0
 keras==2.3.1
